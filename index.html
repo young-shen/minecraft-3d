@@ -115,13 +115,12 @@
       width: 32px; height: 32px;
       left: 0; top: -16px;
       background: #5AB74A;
-      transform: rotateX(-90deg);
+      transform: rotateX(90deg);
       background-image:
         radial-gradient(circle at 20% 30%, #6FD05A 2px, transparent 3px),
         radial-gradient(circle at 70% 60%, #4A9E3A 2px, transparent 3px),
-        radial-gradient(circle at 45% 80%, #6FD05A 1.5px, transparent 2px),
-        linear-gradient(135deg, #5AB74A 0%, #5AB74A 100%);
-      background-size: 16px 16px, 20px 20px, 12px 12px, 100% 100%;
+        radial-gradient(circle at 45% 80%, #6FD05A 1.5px, transparent 2px);
+      background-size: 16px 16px, 20px 20px, 12px 12px;
     }
 
     /* Bottom: dirt */
@@ -129,7 +128,7 @@
       width: 32px; height: 32px;
       left: 0; top: -16px;
       background: #7A5A3A;
-      transform: rotateX(90deg) translateZ(-32px);
+      transform: rotateX(-90deg) translateZ(32px);
     }
 
     /* Sides: dirt with grass top edge */
@@ -159,6 +158,9 @@
     /* ========== Trees (Minecraft oak style) ========== */
     .oak-tree {
       position: absolute;
+      width: 48px;
+      height: 100px;
+      transform-origin: bottom center;
       transform-style: preserve-3d;
     }
 
@@ -282,7 +284,7 @@
     .head .face.top {
       width: 56px; height: 56px;
       left: 0; top: -28px;
-      transform: rotateX(-90deg);
+      transform: rotateX(90deg);
       background: #6B4423;
       background-image:
         radial-gradient(circle at 25% 30%, #5C3A1C 3px, transparent 4px),
@@ -292,7 +294,7 @@
     .head .face.bottom {
       width: 56px; height: 56px;
       left: 0; top: -28px;
-      transform: rotateX(90deg) translateZ(-56px);
+      transform: rotateX(-90deg) translateZ(56px);
       background: #D4A880;
     }
 
@@ -378,8 +380,8 @@
     .body .face.back   { width: 60px; height: 72px; left: 0; top: 0; transform: rotateY(180deg) translateZ(16px); background: #008888; }
     .body .face.left   { width: 32px; height: 72px; left: -16px; top: 0; transform: rotateY(-90deg); background: #009090; }
     .body .face.right  { width: 32px; height: 72px; left: -16px; top: 0; transform: rotateY(90deg) translateZ(60px); background: #009090; }
-    .body .face.top    { width: 60px; height: 32px; left: 0; top: -16px; transform: rotateX(-90deg); background: #009999; }
-    .body .face.bottom { width: 60px; height: 32px; left: 0; top: -16px; transform: rotateX(90deg) translateZ(-72px); background: #007777; }
+    .body .face.top    { width: 60px; height: 32px; left: 0; top: -16px; transform: rotateX(90deg); background: #009999; }
+    .body .face.bottom { width: 60px; height: 32px; left: 0; top: -16px; transform: rotateX(-90deg) translateZ(72px); background: #007777; }
 
     .shirt-collar {
       position: absolute;
@@ -413,8 +415,8 @@
     .arm .face.back   { width: 20px; height: 64px; left: 0; top: 0; transform: rotateY(180deg) translateZ(10px); background: #D4A880; }
     .arm .face.left   { width: 20px; height: 64px; left: -10px; top: 0; transform: rotateY(-90deg); background: #D4A880; }
     .arm .face.right  { width: 20px; height: 64px; left: -10px; top: 0; transform: rotateY(90deg) translateZ(20px); background: #C89970; }
-    .arm .face.top    { width: 20px; height: 20px; left: 0; top: -10px; transform: rotateX(-90deg); background: #D4A880; }
-    .arm .face.bottom { width: 20px; height: 20px; left: 0; top: -10px; transform: rotateX(90deg) translateZ(-64px); background: #D4A880; }
+    .arm .face.top    { width: 20px; height: 20px; left: 0; top: -10px; transform: rotateX(90deg); background: #D4A880; }
+    .arm .face.bottom { width: 20px; height: 20px; left: 0; top: -10px; transform: rotateX(-90deg) translateZ(64px); background: #D4A880; }
 
     .arm-left { left: -2px; transform-origin: 50% 0px; }
     .arm-right { right: -2px; transform-origin: 50% 0px; }
@@ -432,8 +434,8 @@
     .sleeve .face.back   { width: 22px; height: 22px; left: 0; top: 0; transform: rotateY(180deg) translateZ(11px); background: #008888; }
     .sleeve .face.left   { width: 22px; height: 22px; left: -11px; top: 0; transform: rotateY(-90deg); background: #009090; }
     .sleeve .face.right  { width: 22px; height: 22px; left: -11px; top: 0; transform: rotateY(90deg) translateZ(22px); background: #009090; }
-    .sleeve .face.top    { width: 22px; height: 22px; left: 0; top: -11px; transform: rotateX(-90deg); background: #009999; }
-    .sleeve .face.bottom { width: 22px; height: 22px; left: 0; top: -11px; transform: rotateX(90deg) translateZ(-22px); background: #008888; }
+    .sleeve .face.top    { width: 22px; height: 22px; left: 0; top: -11px; transform: rotateX(90deg); background: #009999; }
+    .sleeve .face.bottom { width: 22px; height: 22px; left: 0; top: -11px; transform: rotateX(-90deg) translateZ(22px); background: #008888; }
 
     /* --- Legs (22 wide x 72 tall x 22 deep) --- */
     .leg {
@@ -447,8 +449,8 @@
     .leg .face.back   { width: 22px; height: 72px; left: 0; top: 0; transform: rotateY(180deg) translateZ(11px); background: #000077; }
     .leg .face.left   { width: 22px; height: 72px; left: -11px; top: 0; transform: rotateY(-90deg); background: #000088; }
     .leg .face.right  { width: 22px; height: 72px; left: -11px; top: 0; transform: rotateY(90deg) translateZ(22px); background: #000088; }
-    .leg .face.top    { width: 22px; height: 22px; left: 0; top: -11px; transform: rotateX(-90deg); background: #000088; }
-    .leg .face.bottom { width: 22px; height: 22px; left: 0; top: -11px; transform: rotateX(90deg) translateZ(-72px); background: #666; }
+    .leg .face.top    { width: 22px; height: 22px; left: 0; top: -11px; transform: rotateX(90deg); background: #000088; }
+    .leg .face.bottom { width: 22px; height: 22px; left: 0; top: -11px; transform: rotateX(-90deg) translateZ(72px); background: #666; }
 
     .leg-left { left: 28px; transform-origin: 50% 0px; }
     .leg-right { right: 28px; transform-origin: 50% 0px; }
@@ -609,14 +611,14 @@
     }
     @keyframes jump-arms-l {
       0% { transform: rotateZ(0deg) rotateX(0deg); }
-      40% { transform: rotateZ(80deg) rotateX(-20deg); }
-      60% { transform: rotateZ(80deg) rotateX(-20deg); }
+      40% { transform: rotateZ(-80deg) rotateX(-20deg); }
+      60% { transform: rotateZ(-80deg) rotateX(-20deg); }
       100% { transform: rotateZ(0deg) rotateX(0deg); }
     }
     @keyframes jump-arms-r {
       0% { transform: rotateZ(0deg) rotateX(0deg); }
-      40% { transform: rotateZ(-80deg) rotateX(-20deg); }
-      60% { transform: rotateZ(-80deg) rotateX(-20deg); }
+      40% { transform: rotateZ(80deg) rotateX(-20deg); }
+      60% { transform: rotateZ(80deg) rotateX(-20deg); }
       100% { transform: rotateZ(0deg) rotateX(0deg); }
     }
 
@@ -794,142 +796,7 @@
     <div class="scene-3d">
       <div class="world" id="world">
         <div class="ground-platform" id="groundPlatform"></div>
-
-        <!-- Tree 1: front-left -->
-        <div class="oak-tree" style="left: -200px; bottom: 0; transform: translateZ(150px);">
-          <div class="oak-log">
-            <div class="face front"></div>
-            <div class="face back"></div>
-            <div class="face left"></div>
-            <div class="face right"></div>
-            <div class="face top"></div>
-            <div class="face bottom"></div>
-          </div>
-          <div class="oak-leaves-cluster lvl-1">
-            <div class="face front"></div>
-            <div class="face back"></div>
-            <div class="face left"></div>
-            <div class="face right"></div>
-            <div class="face top"></div>
-            <div class="face bottom"></div>
-          </div>
-          <div class="oak-leaves-cluster lvl-2">
-            <div class="face front"></div>
-            <div class="face back"></div>
-            <div class="face left"></div>
-            <div class="face right"></div>
-            <div class="face top"></div>
-            <div class="face bottom"></div>
-          </div>
-          <div class="oak-leaves-cluster lvl-3">
-            <div class="face front"></div>
-            <div class="face back"></div>
-            <div class="face left"></div>
-            <div class="face right"></div>
-            <div class="face top"></div>
-            <div class="face bottom"></div>
-          </div>
-        </div>
-
-        <!-- Tree 2: back-right -->
-        <div class="oak-tree" style="left: 180px; bottom: 0; transform: scale(0.9) translateZ(-180px);">
-          <div class="oak-log">
-            <div class="face front"></div>
-            <div class="face back"></div>
-            <div class="face left"></div>
-            <div class="face right"></div>
-            <div class="face top"></div>
-            <div class="face bottom"></div>
-          </div>
-          <div class="oak-leaves-cluster lvl-1">
-            <div class="face front"></div>
-            <div class="face back"></div>
-            <div class="face left"></div>
-            <div class="face right"></div>
-            <div class="face top"></div>
-            <div class="face bottom"></div>
-          </div>
-          <div class="oak-leaves-cluster lvl-2">
-            <div class="face front"></div>
-            <div class="face back"></div>
-            <div class="face left"></div>
-            <div class="face right"></div>
-            <div class="face top"></div>
-            <div class="face bottom"></div>
-          </div>
-          <div class="oak-leaves-cluster lvl-3">
-            <div class="face front"></div>
-            <div class="face back"></div>
-            <div class="face left"></div>
-            <div class="face right"></div>
-            <div class="face top"></div>
-            <div class="face bottom"></div>
-          </div>
-        </div>
-
-        <!-- Tree 3: far back left -->
-        <div class="oak-tree" style="left: -220px; bottom: 0; transform: scale(0.7) translateZ(-200px);">
-          <div class="oak-log">
-            <div class="face front"></div>
-            <div class="face back"></div>
-            <div class="face left"></div>
-            <div class="face right"></div>
-            <div class="face top"></div>
-            <div class="face bottom"></div>
-          </div>
-          <div class="oak-leaves-cluster lvl-1">
-            <div class="face front"></div>
-            <div class="face back"></div>
-            <div class="face left"></div>
-            <div class="face right"></div>
-            <div class="face top"></div>
-            <div class="face bottom"></div>
-          </div>
-          <div class="oak-leaves-cluster lvl-2">
-            <div class="face front"></div>
-            <div class="face back"></div>
-            <div class="face left"></div>
-            <div class="face right"></div>
-            <div class="face top"></div>
-            <div class="face bottom"></div>
-          </div>
-        </div>
-
-        <!-- Tree 4: front-right -->
-        <div class="oak-tree" style="left: 200px; bottom: 0; transform: scale(0.85) translateZ(120px);">
-          <div class="oak-log">
-            <div class="face front"></div>
-            <div class="face back"></div>
-            <div class="face left"></div>
-            <div class="face right"></div>
-            <div class="face top"></div>
-            <div class="face bottom"></div>
-          </div>
-          <div class="oak-leaves-cluster lvl-1">
-            <div class="face front"></div>
-            <div class="face back"></div>
-            <div class="face left"></div>
-            <div class="face right"></div>
-            <div class="face top"></div>
-            <div class="face bottom"></div>
-          </div>
-          <div class="oak-leaves-cluster lvl-2">
-            <div class="face front"></div>
-            <div class="face back"></div>
-            <div class="face left"></div>
-            <div class="face right"></div>
-            <div class="face top"></div>
-            <div class="face bottom"></div>
-          </div>
-          <div class="oak-leaves-cluster lvl-3">
-            <div class="face front"></div>
-            <div class="face back"></div>
-            <div class="face left"></div>
-            <div class="face right"></div>
-            <div class="face top"></div>
-            <div class="face bottom"></div>
-          </div>
-        </div>
+        <div id="treesContainer"></div>
 
         <!-- Stone blocks -->
         <div class="stone-block" style="left: -110px; top: 70px;">
@@ -1124,6 +991,62 @@
           groundPlatform.appendChild(block);
         }
       }
+
+      // Generate trees (various sizes and distances)
+      const treesContainer = document.getElementById('treesContainer');
+      const trees = [
+        { x: -200, z: 180, scale: 1.0 },   // front-left large
+        { x: 180, z: 150, scale: 0.9 },    // front-right medium
+        { x: -220, z: -180, scale: 0.8 },  // back-left medium
+        { x: 200, z: -200, scale: 0.7 },   // back-right small
+        { x: -170, z: 20, scale: 0.85 },   // mid-left
+        { x: 210, z: -50, scale: 0.75 },   // mid-right small
+        { x: -100, z: -220, scale: 0.65 }, // far back left
+        { x: 120, z: -230, scale: 0.6 },   // far back right
+      ];
+
+      trees.forEach(tree => {
+        const treeEl = document.createElement('div');
+        treeEl.className = 'oak-tree';
+        treeEl.style.left = tree.x + 'px';
+        treeEl.style.bottom = '0px';
+        treeEl.style.transform = `translateZ(${tree.z}px) scale(${tree.scale})`;
+        treeEl.innerHTML = `
+          <div class="oak-log">
+            <div class="face front"></div>
+            <div class="face back"></div>
+            <div class="face left"></div>
+            <div class="face right"></div>
+            <div class="face top"></div>
+            <div class="face bottom"></div>
+          </div>
+          <div class="oak-leaves-cluster lvl-1">
+            <div class="face front"></div>
+            <div class="face back"></div>
+            <div class="face left"></div>
+            <div class="face right"></div>
+            <div class="face top"></div>
+            <div class="face bottom"></div>
+          </div>
+          <div class="oak-leaves-cluster lvl-2">
+            <div class="face front"></div>
+            <div class="face back"></div>
+            <div class="face left"></div>
+            <div class="face right"></div>
+            <div class="face top"></div>
+            <div class="face bottom"></div>
+          </div>
+          <div class="oak-leaves-cluster lvl-3">
+            <div class="face front"></div>
+            <div class="face back"></div>
+            <div class="face left"></div>
+            <div class="face right"></div>
+            <div class="face top"></div>
+            <div class="face bottom"></div>
+          </div>
+        `;
+        treesContainer.appendChild(treeEl);
+      });
 
       // DOM
       const stage = document.getElementById('stage');
