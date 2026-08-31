@@ -113,8 +113,9 @@
     /* Top: green grass */
     .grass-block .face.top {
       width: 32px; height: 32px;
+      left: 0; top: -16px;
       background: #5AB74A;
-      transform: rotateX(90deg) translateZ(16px);
+      transform: rotateX(-90deg);
       background-image:
         radial-gradient(circle at 20% 30%, #6FD05A 2px, transparent 3px),
         radial-gradient(circle at 70% 60%, #4A9E3A 2px, transparent 3px),
@@ -126,8 +127,9 @@
     /* Bottom: dirt */
     .grass-block .face.bottom {
       width: 32px; height: 32px;
+      left: 0; top: -16px;
       background: #7A5A3A;
-      transform: rotateX(-90deg) translateZ(16px);
+      transform: rotateX(90deg) translateZ(-32px);
     }
 
     /* Sides: dirt with grass top edge */
@@ -140,11 +142,11 @@
           #8B6F47 9px, #8B6F47 100%);
     }
 
-    .grass-block .face.front  { transform: translateZ(16px); }
-    .grass-block .face.back   { transform: rotateY(180deg) translateZ(16px); background:
+    .grass-block .face.front  { left: 0; top: 0; transform: translateZ(16px); }
+    .grass-block .face.back   { left: 0; top: 0; transform: rotateY(180deg) translateZ(16px); background:
         linear-gradient(180deg, #4A9E3A 0%, #4A9E3A 6px, #5A7A30 6px, #5A7A30 9px, #7A5A3A 9px, #7A5A3A 100%);}
-    .grass-block .face.left   { transform: rotateY(-90deg) translateZ(16px); }
-    .grass-block .face.right  { transform: rotateY(90deg) translateZ(16px); }
+    .grass-block .face.left   { left: -16px; top: 0; transform: rotateY(-90deg); }
+    .grass-block .face.right  { left: -16px; top: 0; transform: rotateY(90deg) translateZ(32px); }
 
     /* Dirt block variant (lower layer) */
     .dirt-block .face {
@@ -267,17 +269,20 @@
     }
     .head .face.left {
       width: 56px; height: 56px;
-      transform: rotateY(-90deg) translateZ(28px);
+      left: -28px; top: 0;
+      transform: rotateY(-90deg);
       background: linear-gradient(180deg, #6B4423 0%, #6B4423 18px, #D4A880 18px, #D4A880 100%);
     }
     .head .face.right {
       width: 56px; height: 56px;
-      transform: rotateY(90deg) translateZ(28px);
+      left: -28px; top: 0;
+      transform: rotateY(90deg) translateZ(56px);
       background: linear-gradient(180deg, #5C3A1C 0%, #5C3A1C 18px, #C89970 18px, #C89970 100%);
     }
     .head .face.top {
       width: 56px; height: 56px;
-      transform: rotateX(90deg) translateZ(28px);
+      left: 0; top: -28px;
+      transform: rotateX(-90deg);
       background: #6B4423;
       background-image:
         radial-gradient(circle at 25% 30%, #5C3A1C 3px, transparent 4px),
@@ -286,7 +291,8 @@
     }
     .head .face.bottom {
       width: 56px; height: 56px;
-      transform: rotateX(-90deg) translateZ(28px);
+      left: 0; top: -28px;
+      transform: rotateX(90deg) translateZ(-56px);
       background: #D4A880;
     }
 
@@ -368,12 +374,12 @@
     }
 
     .body .face { background: #00AAAA; }
-    .body .face.front  { width: 60px; height: 72px; transform: translateZ(16px); }
-    .body .face.back   { width: 60px; height: 72px; transform: rotateY(180deg) translateZ(16px); background: #008888; }
-    .body .face.left   { width: 32px; height: 72px; transform: rotateY(-90deg) translateZ(30px); background: #009090; left: 14px; }
-    .body .face.right  { width: 32px; height: 72px; transform: rotateY(90deg) translateZ(30px); background: #009090; left: 14px; }
-    .body .face.top    { width: 60px; height: 32px; transform: rotateX(90deg) translateZ(36px); background: #009999; left: 0; top: 20px; }
-    .body .face.bottom { width: 60px; height: 32px; transform: rotateX(-90deg) translateZ(36px); background: #007777; left: 0; top: 20px; }
+    .body .face.front  { width: 60px; height: 72px; left: 0; top: 0; transform: translateZ(16px); }
+    .body .face.back   { width: 60px; height: 72px; left: 0; top: 0; transform: rotateY(180deg) translateZ(16px); background: #008888; }
+    .body .face.left   { width: 32px; height: 72px; left: -16px; top: 0; transform: rotateY(-90deg); background: #009090; }
+    .body .face.right  { width: 32px; height: 72px; left: -16px; top: 0; transform: rotateY(90deg) translateZ(60px); background: #009090; }
+    .body .face.top    { width: 60px; height: 32px; left: 0; top: -16px; transform: rotateX(-90deg); background: #009999; }
+    .body .face.bottom { width: 60px; height: 32px; left: 0; top: -16px; transform: rotateX(90deg) translateZ(-72px); background: #007777; }
 
     .shirt-collar {
       position: absolute;
@@ -403,12 +409,12 @@
     }
 
     .arm .face { background: #E5B993; }
-    .arm .face.front  { width: 20px; height: 64px; transform: translateZ(10px); }
-    .arm .face.back   { width: 20px; height: 64px; transform: rotateY(180deg) translateZ(10px); background: #D4A880; }
-    .arm .face.left   { width: 20px; height: 64px; transform: rotateY(-90deg) translateZ(10px); background: #D4A880; }
-    .arm .face.right  { width: 20px; height: 64px; transform: rotateY(90deg) translateZ(10px); background: #C89970; }
-    .arm .face.top    { width: 20px; height: 20px; transform: rotateX(90deg) translateZ(32px); background: #D4A880; top: 0; }
-    .arm .face.bottom { width: 20px; height: 20px; transform: rotateX(-90deg) translateZ(32px); background: #D4A880; bottom: 0; top: auto; }
+    .arm .face.front  { width: 20px; height: 64px; left: 0; top: 0; transform: translateZ(10px); }
+    .arm .face.back   { width: 20px; height: 64px; left: 0; top: 0; transform: rotateY(180deg) translateZ(10px); background: #D4A880; }
+    .arm .face.left   { width: 20px; height: 64px; left: -10px; top: 0; transform: rotateY(-90deg); background: #D4A880; }
+    .arm .face.right  { width: 20px; height: 64px; left: -10px; top: 0; transform: rotateY(90deg) translateZ(20px); background: #C89970; }
+    .arm .face.top    { width: 20px; height: 20px; left: 0; top: -10px; transform: rotateX(-90deg); background: #D4A880; }
+    .arm .face.bottom { width: 20px; height: 20px; left: 0; top: -10px; transform: rotateX(90deg) translateZ(-64px); background: #D4A880; }
 
     .arm-left { left: -2px; transform-origin: 50% 0px; }
     .arm-right { right: -2px; transform-origin: 50% 0px; }
@@ -422,12 +428,12 @@
       transform-style: preserve-3d;
     }
     .sleeve .face { background: #00AAAA; }
-    .sleeve .face.front  { width: 22px; height: 22px; transform: translateZ(11px); }
-    .sleeve .face.back   { width: 22px; height: 22px; transform: rotateY(180deg) translateZ(11px); background: #008888; }
-    .sleeve .face.left   { width: 22px; height: 22px; transform: rotateY(-90deg) translateZ(11px); background: #009090; }
-    .sleeve .face.right  { width: 22px; height: 22px; transform: rotateY(90deg) translateZ(11px); background: #009090; }
-    .sleeve .face.top    { width: 22px; height: 22px; transform: rotateX(90deg) translateZ(11px); background: #009999; }
-    .sleeve .face.bottom { width: 22px; height: 22px; transform: rotateX(-90deg) translateZ(11px); background: #008888; }
+    .sleeve .face.front  { width: 22px; height: 22px; left: 0; top: 0; transform: translateZ(11px); }
+    .sleeve .face.back   { width: 22px; height: 22px; left: 0; top: 0; transform: rotateY(180deg) translateZ(11px); background: #008888; }
+    .sleeve .face.left   { width: 22px; height: 22px; left: -11px; top: 0; transform: rotateY(-90deg); background: #009090; }
+    .sleeve .face.right  { width: 22px; height: 22px; left: -11px; top: 0; transform: rotateY(90deg) translateZ(22px); background: #009090; }
+    .sleeve .face.top    { width: 22px; height: 22px; left: 0; top: -11px; transform: rotateX(-90deg); background: #009999; }
+    .sleeve .face.bottom { width: 22px; height: 22px; left: 0; top: -11px; transform: rotateX(90deg) translateZ(-22px); background: #008888; }
 
     /* --- Legs (22 wide x 72 tall x 22 deep) --- */
     .leg {
@@ -437,12 +443,12 @@
     }
 
     .leg .face { background: #0000AA; }
-    .leg .face.front  { width: 22px; height: 72px; transform: translateZ(11px); }
-    .leg .face.back   { width: 22px; height: 72px; transform: rotateY(180deg) translateZ(11px); background: #000077; }
-    .leg .face.left   { width: 22px; height: 72px; transform: rotateY(-90deg) translateZ(11px); background: #000088; }
-    .leg .face.right  { width: 22px; height: 72px; transform: rotateY(90deg) translateZ(11px); background: #000088; }
-    .leg .face.top    { width: 22px; height: 22px; transform: rotateX(90deg) translateZ(36px); background: #000088; top: 0; }
-    .leg .face.bottom { width: 22px; height: 22px; transform: rotateX(-90deg) translateZ(36px); background: #666; bottom: 0; top: auto; }
+    .leg .face.front  { width: 22px; height: 72px; left: 0; top: 0; transform: translateZ(11px); }
+    .leg .face.back   { width: 22px; height: 72px; left: 0; top: 0; transform: rotateY(180deg) translateZ(11px); background: #000077; }
+    .leg .face.left   { width: 22px; height: 72px; left: -11px; top: 0; transform: rotateY(-90deg); background: #000088; }
+    .leg .face.right  { width: 22px; height: 72px; left: -11px; top: 0; transform: rotateY(90deg) translateZ(22px); background: #000088; }
+    .leg .face.top    { width: 22px; height: 22px; left: 0; top: -11px; transform: rotateX(-90deg); background: #000088; }
+    .leg .face.bottom { width: 22px; height: 22px; left: 0; top: -11px; transform: rotateX(90deg) translateZ(-72px); background: #666; }
 
     .leg-left { left: 28px; transform-origin: 50% 0px; }
     .leg-right { right: 28px; transform-origin: 50% 0px; }
@@ -595,15 +601,23 @@
       100% { transform: translateY(0); }
     }
 
-    .character.jump .arm-left,
-    .character.jump .arm-right {
-      animation: jump-arms 1s ease-out;
+    .character.jump .arm-left {
+      animation: jump-arms-l 1s ease-out;
     }
-    @keyframes jump-arms {
-      0% { transform: rotateX(0deg); }
-      40% { transform: rotateX(-100deg); }
-      60% { transform: rotateX(-100deg); }
-      100% { transform: rotateX(0deg); }
+    .character.jump .arm-right {
+      animation: jump-arms-r 1s ease-out;
+    }
+    @keyframes jump-arms-l {
+      0% { transform: rotateZ(0deg) rotateX(0deg); }
+      40% { transform: rotateZ(80deg) rotateX(-20deg); }
+      60% { transform: rotateZ(80deg) rotateX(-20deg); }
+      100% { transform: rotateZ(0deg) rotateX(0deg); }
+    }
+    @keyframes jump-arms-r {
+      0% { transform: rotateZ(0deg) rotateX(0deg); }
+      40% { transform: rotateZ(-80deg) rotateX(-20deg); }
+      60% { transform: rotateZ(-80deg) rotateX(-20deg); }
+      100% { transform: rotateZ(0deg) rotateX(0deg); }
     }
 
     .character.jump .leg-left,
@@ -782,7 +796,7 @@
         <div class="ground-platform" id="groundPlatform"></div>
 
         <!-- Tree 1: front-left -->
-        <div class="oak-tree" style="left: -170px; top: -90px;">
+        <div class="oak-tree" style="left: -200px; bottom: 0; transform: translateZ(150px);">
           <div class="oak-log">
             <div class="face front"></div>
             <div class="face back"></div>
@@ -818,7 +832,7 @@
         </div>
 
         <!-- Tree 2: back-right -->
-        <div class="oak-tree" style="left: 150px; top: -150px; transform: scale(0.9);">
+        <div class="oak-tree" style="left: 180px; bottom: 0; transform: scale(0.9) translateZ(-180px);">
           <div class="oak-log">
             <div class="face front"></div>
             <div class="face back"></div>
@@ -854,7 +868,7 @@
         </div>
 
         <!-- Tree 3: far back left -->
-        <div class="oak-tree" style="left: -200px; top: -210px; transform: scale(0.7);">
+        <div class="oak-tree" style="left: -220px; bottom: 0; transform: scale(0.7) translateZ(-200px);">
           <div class="oak-log">
             <div class="face front"></div>
             <div class="face back"></div>
@@ -882,7 +896,7 @@
         </div>
 
         <!-- Tree 4: front-right -->
-        <div class="oak-tree" style="left: 200px; top: -60px; transform: scale(0.85);">
+        <div class="oak-tree" style="left: 200px; bottom: 0; transform: scale(0.85) translateZ(120px);">
           <div class="oak-log">
             <div class="face front"></div>
             <div class="face back"></div>
@@ -1070,7 +1084,7 @@
       // Generate grass block ground platform
       const groundPlatform = document.getElementById('groundPlatform');
       const BLOCK_SIZE = 32;
-      const GRID_SIZE = 9;
+      const GRID_SIZE = 15;
       const half = Math.floor(GRID_SIZE / 2);
 
       // Top grass layer
