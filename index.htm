@@ -1,0 +1,250 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <meta http-equiv="Content-Style-Type" content="text/css">
+  <title></title>
+  <meta name="Generator" content="Cocoa HTML Writer">
+  <meta name="CocoaVersion" content="2575.7">
+  <style type="text/css">
+    p.p1 {margin: 0.0px 0.0px 0.0px 0.0px; font: 16.0px 'Helvetica Neue'; -webkit-text-stroke: #000000; background-color: #ffffff}
+    p.p2 {margin: 0.0px 0.0px 0.0px 0.0px; font: 16.0px 'Helvetica Neue'; -webkit-text-stroke: #000000; background-color: #ffffff; min-height: 18.0px}
+    span.s1 {font-kerning: none}
+  </style>
+</head>
+<body>
+<p class="p1"><span class="s1">&lt;!DOCTYPE html&gt;</span></p>
+<p class="p1"><span class="s1">&lt;html lang="zh-CN"&gt;</span></p>
+<p class="p1"><span class="s1">&lt;head&gt;</span></p>
+<p class="p1"><span class="s1">&lt;meta charset="UTF-8"&gt;</span></p>
+<p class="p1"><span class="s1">&lt;meta name="viewport" content="width=device-width, initial-scale=1.0"&gt;</span></p>
+<p class="p1"><span class="s1">&lt;title&gt;Minecraft 3D小人 480x480&lt;/title&gt;</span></p>
+<p class="p1"><span class="s1">&lt;style&gt;</span></p>
+<p class="p1"><span class="s1">*{margin:0;padding:0;box-sizing:border-box;}</span></p>
+<p class="p1"><span class="s1">body{background:#111;display:flex;justify-content:center;align-items:center;min-height:100vh;}</span></p>
+<p class="p1"><span class="s1">#container{width:480px;height:480px;position:relative;overflow:hidden;border:2px solid #444;}</span></p>
+<p class="p1"><span class="s1">canvas{width:100%;height:100%;display:block;}</span></p>
+<p class="p1"><span class="s1">&lt;/style&gt;</span></p>
+<p class="p1"><span class="s1">&lt;/head&gt;</span></p>
+<p class="p1"><span class="s1">&lt;body&gt;</span></p>
+<p class="p1"><span class="s1">&lt;div id="container"&gt;&lt;/div&gt;</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1">&lt;script src="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js"&gt;&lt;/script&gt;</span></p>
+<p class="p1"><span class="s1">&lt;script src="https://cdn.jsdelivr.net/npm/three@0.160.0/examples/js/controls/OrbitControls.js"&gt;&lt;/script&gt;</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1">&lt;script&gt;</span></p>
+<p class="p1"><span class="s1">const container = document.getElementById('container');</span></p>
+<p class="p1"><span class="s1">const WIDTH = 480;</span></p>
+<p class="p1"><span class="s1">const HEIGHT = 480;</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1">// 场景、相机、渲染器</span></p>
+<p class="p1"><span class="s1">const scene = new THREE.Scene();</span></p>
+<p class="p1"><span class="s1">scene.background = new THREE.Color(0x87ceeb);</span></p>
+<p class="p1"><span class="s1">const camera = new THREE.PerspectiveCamera(55, WIDTH/HEIGHT, 0.1, 1000);</span></p>
+<p class="p1"><span class="s1">camera.position.set(0, 3.2, 7);</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1">const renderer = new THREE.WebGLRenderer({antialias:true});</span></p>
+<p class="p1"><span class="s1">renderer.setSize(WIDTH, HEIGHT);</span></p>
+<p class="p1"><span class="s1">renderer.shadowMap.enabled = true;</span></p>
+<p class="p1"><span class="s1">renderer.shadowMap.type = THREE.PCFSoftShadowMap;</span></p>
+<p class="p1"><span class="s1">container.appendChild(renderer.domElement);</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1">// 控制器：拖拽旋转</span></p>
+<p class="p1"><span class="s1">const controls = new THREE.OrbitControls(camera, renderer.domElement);</span></p>
+<p class="p1"><span class="s1">controls.enableDamping = true;</span></p>
+<p class="p1"><span class="s1">controls.dampingFactor = 0.05;</span></p>
+<p class="p1"><span class="s1">controls.maxPolarAngle = Math.PI * 0.82;</span></p>
+<p class="p1"><span class="s1">controls.minDistance =3;</span></p>
+<p class="p1"><span class="s1">controls.maxDistance=12;</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1">//灯光</span></p>
+<p class="p1"><span class="s1">const dirLight = new THREE.DirectionalLight(0xffffff,1.1);</span></p>
+<p class="p1"><span class="s1">dirLight.position.set(6,10,4);</span></p>
+<p class="p1"><span class="s1">dirLight.castShadow=true;</span></p>
+<p class="p1"><span class="s1">scene.add(dirLight);</span></p>
+<p class="p1"><span class="s1">scene.add(new THREE.AmbientLight(0xffffff,0.45));</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1">//地面平台 降低高度</span></p>
+<p class="p1"><span class="s1">const groundGeo = new THREE.PlaneGeometry(22,22);</span></p>
+<p class="p1"><span class="s1">const groundMat = new THREE.MeshLambertMaterial({color:0x639b47});</span></p>
+<p class="p1"><span class="s1">const ground = new THREE.Mesh(groundGeo, groundMat);</span></p>
+<p class="p1"><span class="s1">ground.rotation.x = -Math.PI/2;</span></p>
+<p class="p1"><span class="s1">ground.receiveShadow=true;</span></p>
+<p class="p1"><span class="s1">ground.position.y = 0;</span></p>
+<p class="p1"><span class="s1">scene.add(ground);</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1">//地面网格线</span></p>
+<p class="p1"><span class="s1">const grid = new THREE.GridHelper(22,22,0x3b6b2b,0x4e8838);</span></p>
+<p class="p1"><span class="s1">grid.position.y=0.01;</span></p>
+<p class="p1"><span class="s1">scene.add(grid);</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1">//环境：树木、石块、云朵</span></p>
+<p class="p1"><span class="s1">function makeTree(x,z){</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>const trunkMat = new THREE.MeshLambertMaterial({color:0x8b5a2b});</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>const leafMat = new THREE.MeshLambertMaterial({color:0x2d882d});</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>const trunk = new THREE.Mesh(new THREE.BoxGeometry(0.6,2.2,0.6),trunkMat);</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>trunk.position.set(x,1.1,z);</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>trunk.castShadow=true;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>const leaf = new THREE.Mesh(new THREE.BoxGeometry(2.2,2,2.2),leafMat);</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>leaf.position.set(x,3.2,z);</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>leaf.castShadow=true;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>scene.add(trunk,leaf);</span></p>
+<p class="p1"><span class="s1">}</span></p>
+<p class="p1"><span class="s1">makeTree(-7,-6);</span></p>
+<p class="p1"><span class="s1">makeTree(6,-5);</span></p>
+<p class="p1"><span class="s1">makeTree(-6,6);</span></p>
+<p class="p1"><span class="s1">makeTree(7,5);</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1">function makeRock(x,z){</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>const mat = new THREE.MeshLambertMaterial({color:0x888888});</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>const m = new THREE.Mesh(new THREE.BoxGeometry(1.1,0.8,1.1),mat);</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>m.position.set(x,0.4,z);</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>m.castShadow=true;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>scene.add(m);</span></p>
+<p class="p1"><span class="s1">}</span></p>
+<p class="p1"><span class="s1">makeRock(-4,3);</span></p>
+<p class="p1"><span class="s1">makeRock(3,-2);</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1">//远处3D云层</span></p>
+<p class="p1"><span class="s1">function makeCloud(x,y,z){</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>const mat = new THREE.MeshLambertMaterial({color:0xffffff,transparent:true,opacity:0.88});</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>const g = new THREE.Group();</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>for(let i=0;i&lt;6;i++){</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>const b = new THREE.Mesh(new THREE.BoxGeometry(1.8,1.2,1.8),mat);</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>b.position.set((Math.random()-0.5)*3, (Math.random()-0.5)*1.2, (Math.random()-0.5)*3);</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>g.add(b);</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>}</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>g.position.set(x,y,z);</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>scene.add(g);</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>return g;</span></p>
+<p class="p1"><span class="s1">}</span></p>
+<p class="p1"><span class="s1">const clouds = [</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>makeCloud(-12,7,-10),</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>makeCloud(14,8,-12),</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>makeCloud(-10,9,12),</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>makeCloud(13,7,11)</span></p>
+<p class="p1"><span class="s1">];</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1">// ========= 方块小人 修复穿模，严格拼接 =========</span></p>
+<p class="p1"><span class="s1">const playerGroup = new THREE.Group();</span></p>
+<p class="p1"><span class="s1">playerGroup.position.y = 0;</span></p>
+<p class="p1"><span class="s1">scene.add(playerGroup);</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1">const matSkin = new THREE.MeshLambertMaterial({color:0xf2c397});</span></p>
+<p class="p1"><span class="s1">const matBlue = new THREE.MeshLambertMaterial({color:0x3366bb});</span></p>
+<p class="p1"><span class="s1">const matPants = new THREE.MeshLambertMaterial({color:0x224488});</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1">//头</span></p>
+<p class="p1"><span class="s1">const head = new THREE.Mesh(new THREE.BoxGeometry(1,1,1), matSkin);</span></p>
+<p class="p1"><span class="s1">head.position.y = 2.6;</span></p>
+<p class="p1"><span class="s1">head.castShadow=true;</span></p>
+<p class="p1"><span class="s1">playerGroup.add(head);</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1">//身体躯干</span></p>
+<p class="p1"><span class="s1">const body = new THREE.Mesh(new THREE.BoxGeometry(1,1.2,0.6), matBlue);</span></p>
+<p class="p1"><span class="s1">body.position.y =1.5;</span></p>
+<p class="p1"><span class="s1">body.castShadow=true;</span></p>
+<p class="p1"><span class="s1">playerGroup.add(body);</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1">//手臂</span></p>
+<p class="p1"><span class="s1">const armL = new THREE.Mesh(new THREE.BoxGeometry(0.4,1.1,0.4),matSkin);</span></p>
+<p class="p1"><span class="s1">armL.position.set(-0.72,1.6,0);</span></p>
+<p class="p1"><span class="s1">armL.castShadow=true;</span></p>
+<p class="p1"><span class="s1">playerGroup.add(armL);</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1">const armR = new THREE.Mesh(new THREE.BoxGeometry(0.4,1.1,0.4),matSkin);</span></p>
+<p class="p1"><span class="s1">armR.position.set(0.72,1.6,0);</span></p>
+<p class="p1"><span class="s1">armR.castShadow=true;</span></p>
+<p class="p1"><span class="s1">playerGroup.add(armR);</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1">//腿部，无缝贴合</span></p>
+<p class="p1"><span class="s1">const legL = new THREE.Mesh(new THREE.BoxGeometry(0.4,1.1,0.4),matPants);</span></p>
+<p class="p1"><span class="s1">legL.position.set(-0.32,0.45,0);</span></p>
+<p class="p1"><span class="s1">legL.castShadow=true;</span></p>
+<p class="p1"><span class="s1">playerGroup.add(legL);</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1">const legR = new THREE.Mesh(new THREE.BoxGeometry(0.4,1.1,0.4),matPants);</span></p>
+<p class="p1"><span class="s1">legR.position.set(0.32,0.45,0);</span></p>
+<p class="p1"><span class="s1">legR.castShadow=true;</span></p>
+<p class="p1"><span class="s1">playerGroup.add(legR);</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1">//小人物理状态</span></p>
+<p class="p1"><span class="s1">const state = {</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>isDragging:false,</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>floatHeight:0,</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>velocityY:0,</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>gravity:-18,</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>groundY:0,</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>squash:1.0, //挤压形变</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>staggerTimer:0</span></p>
+<p class="p1"><span class="s1">};</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1">//拖拽悬浮逻辑</span></p>
+<p class="p1"><span class="s1">renderer.domElement.addEventListener('pointerdown',()=&gt;{</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>state.isDragging=true;</span></p>
+<p class="p1"><span class="s1">});</span></p>
+<p class="p1"><span class="s1">renderer.domElement.addEventListener('pointerup',()=&gt;{</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>state.isDragging=false;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>//松手开启下落</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>state.velocityY = state.floatHeight * 7.5;</span></p>
+<p class="p1"><span class="s1">});</span></p>
+<p class="p1"><span class="s1">renderer.domElement.addEventListener('pointerleave',()=&gt;{</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>state.isDragging=false;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>state.velocityY = state.floatHeight *7.5;</span></p>
+<p class="p1"><span class="s1">});</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1">const clock = new THREE.Clock();</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1">function animate(){</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>requestAnimationFrame(animate);</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>const dt = clock.getDelta();</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>controls.update();</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>//拖拽悬浮</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>if(state.isDragging){</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>state.floatHeight += (1.8 - state.floatHeight)* 6 * dt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>state.velocityY=0;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>}else{</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>//重力下落</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>state.velocityY += state.gravity * dt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>state.floatHeight += state.velocityY * dt;</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>//地面碰撞</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>if(state.floatHeight &lt;=0){</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>state.floatHeight =0;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>if(state.velocityY &lt; -3){</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>//落地冲击，挤压形变+吃力踉跄动画</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>state.squash = 0.62;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>state.staggerTimer = 0.45;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>state.velocityY = -state.velocityY *0.32;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>}else{</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>state.velocityY =0;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>}</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>}</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>}</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>//落地恢复形变</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>if(state.staggerTimer&gt;0){</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>state.staggerTimer -= dt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>}</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>state.squash += (1 - state.squash) * 7 * dt;</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>//应用位置+挤压缩放（Y轴挤压模拟吃力）</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>playerGroup.position.y = state.floatHeight;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>playerGroup.scale.y = state.squash;</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>//云朵缓慢飘动</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>clouds.forEach((c,i)=&gt;{</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>c.position.x += dt *0.22 * ((i%2)?1:-1);</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>if(c.position.x&gt;18) c.position.x=-18;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>if(c.position.x&lt;-18) c.position.x=18;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>});</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>renderer.render(scene,camera);</span></p>
+<p class="p1"><span class="s1">}</span></p>
+<p class="p1"><span class="s1">animate();</span></p>
+<p class="p1"><span class="s1">&lt;/script&gt;</span></p>
+<p class="p1"><span class="s1">&lt;/body&gt;</span></p>
+<p class="p1"><span class="s1">&lt;/html&gt;</span></p>
+</body>
+</html>
