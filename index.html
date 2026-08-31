@@ -1,211 +1,1371 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Minecraft 3D小人 480x480</title>
-<style>
-*{margin:0;padding:0;box-sizing:border-box;}
-body{background:#111;display:flex;justify-content:center;align-items:center;min-height:100vh;}
-#container{width:480px;height:480px;position:relative;overflow:hidden;border:2px solid #444;}
-canvas{width:100%;height:100%;display:block;}
-</style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="creative-medium" content="interactive-prototype" />
+  <title>Minecraft 方块小人</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    html, body {
+      width: 100%;
+      height: 100%;
+      background: #1a1a2e;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: "Courier New", monospace;
+      overflow: hidden;
+    }
+
+    .stage {
+      width: 480px;
+      height: 480px;
+      position: relative;
+      background: linear-gradient(180deg, #78A7D8 0%, #95C1E5 40%, #B8D9EE 70%, #D0E8F5 100%);
+      border: 4px solid #3a3a3a;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+      overflow: hidden;
+      cursor: grab;
+      user-select: none;
+      touch-action: none;
+    }
+
+    .stage:active { cursor: grabbing; }
+
+    /* ========== 2D Background (sun + distant clouds) ========== */
+    .sun-bg {
+      position: absolute;
+      width: 48px;
+      height: 48px;
+      top: 28px;
+      right: 44px;
+      background: #FFE066;
+      box-shadow: 0 0 36px #FFD700, 0 0 72px rgba(255,215,0,0.35);
+      z-index: 2;
+      pointer-events: none;
+      image-rendering: pixelated;
+    }
+
+    .cloud-bg {
+      position: absolute;
+      background: #fff;
+      opacity: 0.8;
+      z-index: 2;
+      pointer-events: none;
+      image-rendering: pixelated;
+    }
+    .cloud-bg::before, .cloud-bg::after {
+      content: '';
+      position: absolute;
+      background: #fff;
+    }
+    .cloud-bg.c1 { width: 48px; height: 12px; top: 50px; left: 45px; }
+    .cloud-bg.c1::before { width: 22px; height: 12px; top: -8px; left: 8px; }
+    .cloud-bg.c1::after { width: 16px; height: 10px; top: -6px; left: 24px; }
+
+    .cloud-bg.c2 { width: 58px; height: 14px; top: 85px; left: 270px; }
+    .cloud-bg.c2::before { width: 26px; height: 14px; top: -10px; left: 10px; }
+    .cloud-bg.c2::after { width: 20px; height: 12px; top: -8px; left: 30px; }
+
+    .cloud-bg.c3 { width: 40px; height: 10px; top: 32px; left: 170px; opacity: 0.65; }
+    .cloud-bg.c3::before { width: 18px; height: 10px; top: -6px; left: 5px; }
+    .cloud-bg.c3::after { width: 14px; height: 8px; top: -5px; left: 18px; }
+
+    /* ========== 3D Scene ========== */
+    .scene-3d {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      perspective: 620px;
+      perspective-origin: 50% 60%;
+      z-index: 5;
+    }
+
+    .world {
+      position: absolute;
+      width: 0;
+      height: 0;
+      top: 65%;
+      left: 50%;
+      transform-style: preserve-3d;
+      will-change: transform;
+    }
+
+    /* ========== Grass Block Ground Platform ========== */
+    .ground-platform {
+      position: absolute;
+      transform-style: preserve-3d;
+    }
+
+    .grass-block {
+      position: absolute;
+      width: 32px;
+      height: 32px;
+      transform-style: preserve-3d;
+    }
+
+    .grass-block .face { position: absolute; }
+
+    /* Top: green grass */
+    .grass-block .face.top {
+      width: 32px; height: 32px;
+      background: #5AB74A;
+      transform: rotateX(90deg) translateZ(16px);
+      background-image:
+        radial-gradient(circle at 20% 30%, #6FD05A 2px, transparent 3px),
+        radial-gradient(circle at 70% 60%, #4A9E3A 2px, transparent 3px),
+        radial-gradient(circle at 45% 80%, #6FD05A 1.5px, transparent 2px),
+        linear-gradient(135deg, #5AB74A 0%, #5AB74A 100%);
+      background-size: 16px 16px, 20px 20px, 12px 12px, 100% 100%;
+    }
+
+    /* Bottom: dirt */
+    .grass-block .face.bottom {
+      width: 32px; height: 32px;
+      background: #7A5A3A;
+      transform: rotateX(-90deg) translateZ(16px);
+    }
+
+    /* Sides: dirt with grass top edge */
+    .grass-block .face.side {
+      width: 32px; height: 32px;
+      background:
+        linear-gradient(180deg,
+          #5AB74A 0%, #5AB74A 6px,
+          #6B8E3A 6px, #6B8E3A 9px,
+          #8B6F47 9px, #8B6F47 100%);
+    }
+
+    .grass-block .face.front  { transform: translateZ(16px); }
+    .grass-block .face.back   { transform: rotateY(180deg) translateZ(16px); background:
+        linear-gradient(180deg, #4A9E3A 0%, #4A9E3A 6px, #5A7A30 6px, #5A7A30 9px, #7A5A3A 9px, #7A5A3A 100%);}
+    .grass-block .face.left   { transform: rotateY(-90deg) translateZ(16px); }
+    .grass-block .face.right  { transform: rotateY(90deg) translateZ(16px); }
+
+    /* Dirt block variant (lower layer) */
+    .dirt-block .face {
+      background: #8B6F47 !important;
+      background-image:
+        radial-gradient(circle at 30% 40%, #7A5E3D 3px, transparent 4px),
+        radial-gradient(circle at 70% 70%, #9B7F57 2px, transparent 3px) !important;
+    }
+
+    /* ========== Trees (Minecraft oak style) ========== */
+    .oak-tree {
+      position: absolute;
+      transform-style: preserve-3d;
+    }
+
+    .oak-log {
+      position: absolute;
+      width: 16px;
+      height: 48px;
+      left: -8px;
+      bottom: 0;
+      transform-style: preserve-3d;
+    }
+    .oak-log .face { position: absolute; }
+    .oak-log .face.front  { width: 16px; height: 48px; transform: translateZ(8px); background: #8B6F3A; background-image: linear-gradient(0deg, transparent 0%, rgba(0,0,0,0.15) 100%), repeating-linear-gradient(0deg, #7A5E2D 0px, #7A5E2D 3px, #8B6F3A 3px, #8B6F3A 6px); }
+    .oak-log .face.back   { width: 16px; height: 48px; transform: rotateY(180deg) translateZ(8px); background: #6B5028; background-image: repeating-linear-gradient(0deg, #5A4220 0px, #5A4220 3px, #6B5028 3px, #6B5028 6px); }
+    .oak-log .face.left   { width: 16px; height: 48px; transform: rotateY(-90deg) translateZ(8px); background: #7A5E30; background-image: repeating-linear-gradient(0deg, #695026 0px, #695026 3px, #7A5E30 3px, #7A5E30 6px); }
+    .oak-log .face.right  { width: 16px; height: 48px; transform: rotateY(90deg) translateZ(8px); background: #7A5E30; background-image: repeating-linear-gradient(0deg, #695026 0px, #695026 3px, #7A5E30 3px, #7A5E30 6px); }
+    .oak-log .face.top    { width: 16px; height: 16px; transform: rotateX(90deg) translateZ(24px); background: #A08450; top: 0; }
+    .oak-log .face.bottom { width: 16px; height: 16px; transform: rotateX(-90deg) translateZ(24px); background: #5A4220; bottom: 0; top: auto; }
+
+    .oak-leaves-cluster {
+      position: absolute;
+      width: 48px;
+      height: 48px;
+      left: -24px;
+      transform-style: preserve-3d;
+    }
+    .oak-leaves-cluster.lvl-1 { bottom: 32px; }
+    .oak-leaves-cluster.lvl-2 { bottom: 52px; width: 40px; height: 40px; left: -20px; }
+    .oak-leaves-cluster.lvl-3 { bottom: 68px; width: 24px; height: 24px; left: -12px; }
+
+    .oak-leaves-cluster .face { position: absolute; background: #3B8B2E; }
+    .oak-leaves-cluster.lvl-1 .face.front  { width: 48px; height: 48px; transform: translateZ(24px); background: #45A336; }
+    .oak-leaves-cluster.lvl-1 .face.back   { width: 48px; height: 48px; transform: rotateY(180deg) translateZ(24px); background: #2E7024; }
+    .oak-leaves-cluster.lvl-1 .face.left   { width: 48px; height: 48px; transform: rotateY(-90deg) translateZ(24px); background: #357E28; }
+    .oak-leaves-cluster.lvl-1 .face.right  { width: 48px; height: 48px; transform: rotateY(90deg) translateZ(24px); background: #357E28; }
+    .oak-leaves-cluster.lvl-1 .face.top    { width: 48px; height: 48px; transform: rotateX(90deg) translateZ(24px); background: #4FB83D; }
+    .oak-leaves-cluster.lvl-1 .face.bottom { width: 48px; height: 48px; transform: rotateX(-90deg) translateZ(24px); background: #2A6520; }
+
+    .oak-leaves-cluster.lvl-2 .face.front  { width: 40px; height: 40px; transform: translateZ(20px); background: #45A336; }
+    .oak-leaves-cluster.lvl-2 .face.back   { width: 40px; height: 40px; transform: rotateY(180deg) translateZ(20px); background: #2E7024; }
+    .oak-leaves-cluster.lvl-2 .face.left   { width: 40px; height: 40px; transform: rotateY(-90deg) translateZ(20px); background: #357E28; }
+    .oak-leaves-cluster.lvl-2 .face.right  { width: 40px; height: 40px; transform: rotateY(90deg) translateZ(20px); background: #357E28; }
+    .oak-leaves-cluster.lvl-2 .face.top    { width: 40px; height: 40px; transform: rotateX(90deg) translateZ(20px); background: #4FB83D; }
+    .oak-leaves-cluster.lvl-2 .face.bottom { width: 40px; height: 40px; transform: rotateX(-90deg) translateZ(20px); background: #2A6520; }
+
+    .oak-leaves-cluster.lvl-3 .face.front  { width: 24px; height: 24px; transform: translateZ(12px); background: #45A336; }
+    .oak-leaves-cluster.lvl-3 .face.back   { width: 24px; height: 24px; transform: rotateY(180deg) translateZ(12px); background: #2E7024; }
+    .oak-leaves-cluster.lvl-3 .face.left   { width: 24px; height: 24px; transform: rotateY(-90deg) translateZ(12px); background: #357E28; }
+    .oak-leaves-cluster.lvl-3 .face.right  { width: 24px; height: 24px; transform: rotateY(90deg) translateZ(12px); background: #357E28; }
+    .oak-leaves-cluster.lvl-3 .face.top    { width: 24px; height: 24px; transform: rotateX(90deg) translateZ(12px); background: #4FB83D; }
+    .oak-leaves-cluster.lvl-3 .face.bottom { width: 24px; height: 24px; transform: rotateX(-90deg) translateZ(12px); background: #2A6520; }
+
+    /* ========== Stone block ========== */
+    .stone-block {
+      position: absolute;
+      width: 20px;
+      height: 20px;
+      transform-style: preserve-3d;
+    }
+    .stone-block .face { position: absolute; background: #9A9A9A; }
+    .stone-block .face.front  { width: 20px; height: 20px; transform: translateZ(10px); background: #A0A0A0; background-image: radial-gradient(circle at 30% 40%, #888 2px, transparent 3px), radial-gradient(circle at 70% 70%, #BBB 1.5px, transparent 2px); }
+    .stone-block .face.back   { width: 20px; height: 20px; transform: rotateY(180deg) translateZ(10px); background: #808080; }
+    .stone-block .face.left   { width: 20px; height: 20px; transform: rotateY(-90deg) translateZ(10px); background: #8E8E8E; }
+    .stone-block .face.right  { width: 20px; height: 20px; transform: rotateY(90deg) translateZ(10px); background: #8E8E8E; }
+    .stone-block .face.top    { width: 20px; height: 20px; transform: rotateX(90deg) translateZ(10px); background: #AAAAAA; }
+    .stone-block .face.bottom { width: 20px; height: 20px; transform: rotateX(-90deg) translateZ(10px); background: #707070; }
+
+    /* ========== Character (Steve style) ========== */
+    .character-group {
+      position: absolute;
+      width: 0;
+      height: 0;
+      top: 0;
+      left: 0;
+      transform-style: preserve-3d;
+      will-change: transform;
+    }
+
+    .character {
+      position: absolute;
+      width: 100px;
+      height: 200px;
+      left: -50px;
+      bottom: 0;
+      transform-style: preserve-3d;
+    }
+
+    .cube { position: absolute; transform-style: preserve-3d; }
+    .face { position: absolute; backface-visibility: hidden; image-rendering: pixelated; }
+
+    /* --- Head (56 x 56 x 56) --- */
+    .head {
+      width: 56px;
+      height: 56px;
+      left: 22px;
+      bottom: 144px;
+    }
+
+    .head .face.front {
+      width: 56px; height: 56px;
+      transform: translateZ(28px);
+      background: #E5B993;
+    }
+    .head .face.back {
+      width: 56px; height: 56px;
+      transform: rotateY(180deg) translateZ(28px);
+      background: linear-gradient(180deg, #6B4423 0%, #6B4423 20px, #D4A880 20px, #D4A880 100%);
+    }
+    .head .face.left {
+      width: 56px; height: 56px;
+      transform: rotateY(-90deg) translateZ(28px);
+      background: linear-gradient(180deg, #6B4423 0%, #6B4423 18px, #D4A880 18px, #D4A880 100%);
+    }
+    .head .face.right {
+      width: 56px; height: 56px;
+      transform: rotateY(90deg) translateZ(28px);
+      background: linear-gradient(180deg, #5C3A1C 0%, #5C3A1C 18px, #C89970 18px, #C89970 100%);
+    }
+    .head .face.top {
+      width: 56px; height: 56px;
+      transform: rotateX(90deg) translateZ(28px);
+      background: #6B4423;
+      background-image:
+        radial-gradient(circle at 25% 30%, #5C3A1C 3px, transparent 4px),
+        radial-gradient(circle at 70% 65%, #7D5030 2px, transparent 3px);
+      background-size: 18px 18px, 22px 22px;
+    }
+    .head .face.bottom {
+      width: 56px; height: 56px;
+      transform: rotateX(-90deg) translateZ(28px);
+      background: #D4A880;
+    }
+
+    /* Face details on front */
+    .hair-fringe {
+      position: absolute;
+      width: 56px;
+      height: 18px;
+      background: #6B4423;
+      top: 0;
+      left: 0;
+      clip-path: polygon(
+        0% 0%, 100% 0%, 100% 100%,
+        92% 85%, 84% 100%, 75% 80%,
+        66% 95%, 55% 75%, 44% 90%,
+        33% 70%, 22% 88%, 12% 75%,
+        4% 92%, 0% 78%
+      );
+    }
+    .hair-side-fringe {
+      position: absolute;
+      width: 5px;
+      height: 22px;
+      background: #6B4423;
+      top: 0;
+    }
+    .hair-side-fringe.l { left: 0; }
+    .hair-side-fringe.r { right: 0; }
+
+    .eye {
+      position: absolute;
+      width: 8px;
+      height: 8px;
+      background: #fff;
+      top: 24px;
+    }
+    .eye.l { left: 12px; }
+    .eye.r { right: 12px; }
+
+    .eye::after {
+      content: '';
+      position: absolute;
+      width: 4px;
+      height: 5px;
+      background: #2a2a2a;
+      bottom: 1px;
+      right: 1px;
+    }
+    .eye.r::after { right: auto; left: 1px; }
+
+    .nose {
+      position: absolute;
+      width: 6px;
+      height: 8px;
+      background: #D4A880;
+      top: 32px;
+      left: 50%;
+      transform: translateX(-50%);
+      border-radius: 0 0 2px 2px;
+    }
+
+    .mouth {
+      position: absolute;
+      width: 16px;
+      height: 4px;
+      background: #7A4A2A;
+      bottom: 16px;
+      left: 50%;
+      transform: translateX(-50%);
+      border-radius: 0 0 4px 4px;
+    }
+
+    /* --- Body (60 wide x 72 tall x 32 deep) --- */
+    .body {
+      width: 60px;
+      height: 72px;
+      left: 20px;
+      bottom: 72px;
+    }
+
+    .body .face { background: #00AAAA; }
+    .body .face.front  { width: 60px; height: 72px; transform: translateZ(16px); }
+    .body .face.back   { width: 60px; height: 72px; transform: rotateY(180deg) translateZ(16px); background: #008888; }
+    .body .face.left   { width: 32px; height: 72px; transform: rotateY(-90deg) translateZ(30px); background: #009090; left: 14px; }
+    .body .face.right  { width: 32px; height: 72px; transform: rotateY(90deg) translateZ(30px); background: #009090; left: 14px; }
+    .body .face.top    { width: 60px; height: 32px; transform: rotateX(90deg) translateZ(36px); background: #009999; left: 0; top: 20px; }
+    .body .face.bottom { width: 60px; height: 32px; transform: rotateX(-90deg) translateZ(36px); background: #007777; left: 0; top: 20px; }
+
+    .shirt-collar {
+      position: absolute;
+      top: 0;
+      left: 50%;
+      transform: translateX(-50%) translateZ(16.5px);
+      width: 20px;
+      height: 10px;
+      background: #008888;
+      clip-path: polygon(0% 0%, 100% 0%, 80% 100%, 50% 30%, 20% 100%);
+    }
+    .shirt-hem {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 60px;
+      height: 4px;
+      background: #008888;
+      transform: translateZ(16.5px);
+    }
+
+    /* --- Arms (20 wide x 64 tall x 20 deep) --- */
+    .arm {
+      width: 20px;
+      height: 64px;
+      bottom: 80px;
+    }
+
+    .arm .face { background: #E5B993; }
+    .arm .face.front  { width: 20px; height: 64px; transform: translateZ(10px); }
+    .arm .face.back   { width: 20px; height: 64px; transform: rotateY(180deg) translateZ(10px); background: #D4A880; }
+    .arm .face.left   { width: 20px; height: 64px; transform: rotateY(-90deg) translateZ(10px); background: #D4A880; }
+    .arm .face.right  { width: 20px; height: 64px; transform: rotateY(90deg) translateZ(10px); background: #C89970; }
+    .arm .face.top    { width: 20px; height: 20px; transform: rotateX(90deg) translateZ(32px); background: #D4A880; top: 0; }
+    .arm .face.bottom { width: 20px; height: 20px; transform: rotateX(-90deg) translateZ(32px); background: #D4A880; bottom: 0; top: auto; }
+
+    .arm-left { left: 0; transform-origin: 50% 0px; }
+    .arm-right { right: 0; transform-origin: 50% 0px; }
+
+    .sleeve {
+      position: absolute;
+      width: 22px;
+      height: 22px;
+      top: 0;
+      left: -1px;
+      transform-style: preserve-3d;
+    }
+    .sleeve .face { background: #00AAAA; }
+    .sleeve .face.front  { width: 22px; height: 22px; transform: translateZ(11px); }
+    .sleeve .face.back   { width: 22px; height: 22px; transform: rotateY(180deg) translateZ(11px); background: #008888; }
+    .sleeve .face.left   { width: 22px; height: 22px; transform: rotateY(-90deg) translateZ(11px); background: #009090; }
+    .sleeve .face.right  { width: 22px; height: 22px; transform: rotateY(90deg) translateZ(11px); background: #009090; }
+    .sleeve .face.top    { width: 22px; height: 22px; transform: rotateX(90deg) translateZ(11px); background: #009999; }
+
+    /* --- Legs (22 wide x 72 tall x 22 deep) --- */
+    .leg {
+      width: 22px;
+      height: 72px;
+      bottom: 0;
+    }
+
+    .leg .face { background: #0000AA; }
+    .leg .face.front  { width: 22px; height: 72px; transform: translateZ(11px); }
+    .leg .face.back   { width: 22px; height: 72px; transform: rotateY(180deg) translateZ(11px); background: #000077; }
+    .leg .face.left   { width: 22px; height: 72px; transform: rotateY(-90deg) translateZ(11px); background: #000088; }
+    .leg .face.right  { width: 22px; height: 72px; transform: rotateY(90deg) translateZ(11px); background: #000088; }
+    .leg .face.top    { width: 22px; height: 22px; transform: rotateX(90deg) translateZ(36px); background: #000088; top: 0; }
+    .leg .face.bottom { width: 22px; height: 22px; transform: rotateX(-90deg) translateZ(36px); background: #666; bottom: 0; top: auto; }
+
+    .leg-left { left: 28px; transform-origin: 50% 0px; }
+    .leg-right { right: 28px; transform-origin: 50% 0px; }
+
+    /* Shoes (gray) */
+    .shoe {
+      position: absolute;
+      width: 24px;
+      height: 12px;
+      bottom: 0;
+      left: -1px;
+      transform-style: preserve-3d;
+    }
+    .shoe .face { position: absolute; background: #707070; }
+    .shoe .face.front  { width: 24px; height: 12px; transform: translateZ(12px); background: #7A7A7A; }
+    .shoe .face.back   { width: 24px; height: 12px; transform: rotateY(180deg) translateZ(12px); background: #555; }
+    .shoe .face.left   { width: 24px; height: 12px; transform: rotateY(-90deg) translateZ(12px); background: #606060; }
+    .shoe .face.right  { width: 24px; height: 12px; transform: rotateY(90deg) translateZ(12px); background: #606060; }
+    .shoe .face.top    { width: 24px; height: 24px; transform: rotateX(90deg) translateZ(6px); background: #6A6A6A; }
+    .shoe .face.bottom { width: 24px; height: 24px; transform: rotateX(-90deg) translateZ(6px); background: #404040; }
+
+    /* ========== Shadow ========== */
+    .shadow {
+      position: absolute;
+      width: 64px;
+      height: 16px;
+      background: rgba(0,0,0,0.3);
+      border-radius: 50%;
+      filter: blur(3px);
+      left: -32px;
+      top: -8px;
+      transform: rotateX(90deg) translateZ(0.5px);
+      pointer-events: none;
+    }
+
+    /* ========== HUD ========== */
+    .title-bar {
+      position: absolute;
+      top: 10px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(40, 40, 40, 0.8);
+      color: #fff;
+      padding: 6px 16px;
+      font-family: "Courier New", monospace;
+      font-size: 13px;
+      font-weight: bold;
+      letter-spacing: 2px;
+      border: 2px solid #666;
+      z-index: 100;
+      text-transform: uppercase;
+      pointer-events: none;
+    }
+
+    .hint {
+      position: absolute;
+      top: 44px;
+      left: 50%;
+      transform: translateX(-50%);
+      color: rgba(255,255,255,0.95);
+      font-size: 11px;
+      font-family: "Courier New", monospace;
+      z-index: 100;
+      text-shadow: 1px 1px 2px rgba(0,0,0,0.6);
+      white-space: nowrap;
+      pointer-events: none;
+    }
+
+    .hud {
+      position: absolute;
+      bottom: 12px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      gap: 6px;
+      z-index: 100;
+    }
+
+    .action-btn {
+      background: rgba(50, 50, 50, 0.85);
+      color: #fff;
+      border: 2px solid #888;
+      padding: 8px 12px;
+      font-family: "Courier New", monospace;
+      font-size: 11px;
+      font-weight: bold;
+      cursor: pointer;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      transition: all 0.15s;
+    }
+
+    .action-btn:hover {
+      background: rgba(100, 150, 80, 0.9);
+      border-color: #a0d060;
+      transform: translateY(-2px);
+    }
+
+    .action-btn:active { transform: translateY(0); }
+
+    .action-btn.active {
+      background: rgba(120, 170, 90, 0.95);
+      border-color: #b0e070;
+    }
+
+    /* ========== Animations ========== */
+    .character.idle .head {
+      animation: idle-head 3s ease-in-out infinite;
+    }
+    @keyframes idle-head {
+      0%, 100% { transform: translateY(0) rotateZ(0deg); }
+      50% { transform: translateY(-3px) rotateZ(2deg); }
+    }
+
+    .character.idle .arm-left {
+      animation: idle-arm-l 3s ease-in-out infinite;
+    }
+    @keyframes idle-arm-l {
+      0%, 100% { transform: rotateX(0deg); }
+      50% { transform: rotateX(5deg); }
+    }
+
+    .character.idle .arm-right {
+      animation: idle-arm-r 3s ease-in-out infinite;
+    }
+    @keyframes idle-arm-r {
+      0%, 100% { transform: rotateX(0deg); }
+      50% { transform: rotateX(-5deg); }
+    }
+
+    /* Wave */
+    .character.wave .arm-right {
+      animation: wave-arm 0.35s ease-in-out 4;
+      transform-origin: 50% 0%;
+    }
+    @keyframes wave-arm {
+      0% { transform: rotateZ(-130deg) rotateY(0deg); }
+      50% { transform: rotateZ(-130deg) rotateY(-30deg); }
+      100% { transform: rotateZ(-130deg) rotateY(0deg); }
+    }
+
+    /* Jump */
+    .character.jump {
+      animation: jump-body 1s ease-out;
+    }
+    @keyframes jump-body {
+      0% { transform: translateY(0); }
+      40% { transform: translateY(-80px); }
+      60% { transform: translateY(-80px); }
+      100% { transform: translateY(0); }
+    }
+
+    .character.jump .arm-left,
+    .character.jump .arm-right {
+      animation: jump-arms 1s ease-out;
+    }
+    @keyframes jump-arms {
+      0% { transform: rotateX(0deg); }
+      40% { transform: rotateX(-100deg); }
+      60% { transform: rotateX(-100deg); }
+      100% { transform: rotateX(0deg); }
+    }
+
+    .character.jump .leg-left,
+    .character.jump .leg-right {
+      animation: jump-legs 1s ease-out;
+    }
+    @keyframes jump-legs {
+      0% { transform: rotateX(0deg); }
+      40% { transform: rotateX(30deg); }
+      60% { transform: rotateX(45deg); }
+      100% { transform: rotateX(0deg); }
+    }
+
+    /* Dance */
+    .character.dance .head {
+      animation: dance-head 0.45s ease-in-out infinite;
+    }
+    @keyframes dance-head {
+      0%, 100% { transform: rotateZ(0deg) translateY(0); }
+      25% { transform: rotateZ(-8deg) translateY(-2px); }
+      75% { transform: rotateZ(8deg) translateY(-2px); }
+    }
+
+    .character.dance .arm-left {
+      animation: dance-arm-l 0.45s ease-in-out infinite;
+    }
+    @keyframes dance-arm-l {
+      0%, 100% { transform: rotateX(0deg); }
+      50% { transform: rotateX(-90deg) rotateZ(-15deg); }
+    }
+
+    .character.dance .arm-right {
+      animation: dance-arm-r 0.45s ease-in-out infinite;
+    }
+    @keyframes dance-arm-r {
+      0%, 100% { transform: rotateX(0deg); }
+      50% { transform: rotateX(-90deg) rotateZ(15deg); }
+    }
+
+    .character.dance .leg-left {
+      animation: dance-leg-l 0.45s ease-in-out infinite;
+    }
+    @keyframes dance-leg-l {
+      0%, 100% { transform: rotateX(0deg); }
+      50% { transform: rotateX(25deg); }
+    }
+
+    .character.dance .leg-right {
+      animation: dance-leg-r 0.45s ease-in-out infinite;
+    }
+    @keyframes dance-leg-r {
+      0%, 100% { transform: rotateX(0deg); }
+      50% { transform: rotateX(-25deg); }
+    }
+
+    /* Spin */
+    .character.spin {
+      animation: spin-body 1.8s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    @keyframes spin-body {
+      from { transform: rotateY(0deg); }
+      to { transform: rotateY(360deg); }
+    }
+
+    /* Landing impact */
+    .character.landing {
+      animation: land-squash 0.25s ease-out forwards;
+    }
+    @keyframes land-squash {
+      0% { transform: scaleY(1) scaleX(1); }
+      30% { transform: scaleY(0.78) scaleX(1.12); }
+      60% { transform: scaleY(0.92) scaleX(1.04); }
+      100% { transform: scaleY(1) scaleX(1); }
+    }
+
+    .character.landing .leg-left,
+    .character.landing .leg-right {
+      animation: land-knees 0.25s ease-out forwards;
+    }
+    @keyframes land-knees {
+      0% { transform: rotateX(0deg); }
+      30% { transform: rotateX(35deg); }
+      60% { transform: rotateX(15deg); }
+      100% { transform: rotateX(0deg); }
+    }
+
+    .character.landing .arm-left,
+    .character.landing .arm-right {
+      animation: land-arms 0.25s ease-out forwards;
+    }
+    @keyframes land-arms {
+      0% { transform: rotateX(0deg); }
+      30% { transform: rotateX(-60deg); }
+      60% { transform: rotateX(-20deg); }
+      100% { transform: rotateX(0deg); }
+    }
+
+    .character.landing .head {
+      animation: land-head 0.25s ease-out forwards;
+    }
+    @keyframes land-head {
+      0% { transform: translateY(0); }
+      30% { transform: translateY(4px); }
+      60% { transform: translateY(1px); }
+      100% { transform: translateY(0); }
+    }
+
+    /* Stagger after landing */
+    .character.stagger {
+      animation: stagger-body 0.8s ease-out forwards;
+      transform-origin: 50% 100%;
+    }
+    @keyframes stagger-body {
+      0%   { transform: rotateZ(0deg); }
+      15%  { transform: rotateZ(-6deg); }
+      35%  { transform: rotateZ(5deg); }
+      55%  { transform: rotateZ(-3deg); }
+      75%  { transform: rotateZ(2deg); }
+      100% { transform: rotateZ(0deg); }
+    }
+
+    .character.stagger .head {
+      animation: stagger-head 0.8s ease-out forwards;
+    }
+    @keyframes stagger-head {
+      0%   { transform: rotateZ(0deg); }
+      15%  { transform: rotateZ(8deg); }
+      35%  { transform: rotateZ(-6deg); }
+      55%  { transform: rotateZ(4deg); }
+      75%  { transform: rotateZ(-2deg); }
+      100% { transform: rotateZ(0deg); }
+    }
+
+    .character.stagger .arm-left {
+      animation: stagger-arm-l 0.8s ease-out forwards;
+    }
+    @keyframes stagger-arm-l {
+      0%   { transform: rotateZ(0deg); }
+      20%  { transform: rotateZ(30deg); }
+      45%  { transform: rotateZ(-10deg); }
+      70%  { transform: rotateZ(8deg); }
+      100% { transform: rotateZ(0deg); }
+    }
+
+    .character.stagger .arm-right {
+      animation: stagger-arm-r 0.8s ease-out forwards;
+    }
+    @keyframes stagger-arm-r {
+      0%   { transform: rotateZ(0deg); }
+      20%  { transform: rotateZ(-30deg); }
+      45%  { transform: rotateZ(10deg); }
+      70%  { transform: rotateZ(-8deg); }
+      100% { transform: rotateZ(0deg); }
+    }
+
+    /* Dragging state - floating pose */
+    .character.dragging .arm-left { transform: rotateZ(-25deg); }
+    .character.dragging .arm-right { transform: rotateZ(25deg); }
+    .character.dragging .leg-left,
+    .character.dragging .leg-right { transform: rotateX(15deg); }
+    .character.dragging .head { transform: rotateX(-10deg); }
+  </style>
 </head>
 <body>
-<div id="container"></div>
+  <div class="stage" id="stage">
+    <div class="sun-bg"></div>
+    <div class="cloud-bg c1"></div>
+    <div class="cloud-bg c2"></div>
+    <div class="cloud-bg c3"></div>
 
-<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/build/three.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+    <div class="title-bar">BLOCK BUDDY</div>
+    <div class="hint">拖拽旋转 · 松手掉落 · 点击互动</div>
 
-<script>
-const container = document.getElementById('container');
-const WIDTH = 480;
-const HEIGHT = 480;
+    <div class="scene-3d">
+      <div class="world" id="world">
+        <div class="ground-platform" id="groundPlatform"></div>
 
-const scene = new THREE.Scene();
-scene.background = new THREE.Color(0x87ceeb);
-const camera = new THREE.PerspectiveCamera(55, WIDTH/HEIGHT, 0.1, 1000);
-camera.position.set(0, 3.2, 7);
+        <!-- Tree 1: front-left -->
+        <div class="oak-tree" style="left: -170px; top: -90px;">
+          <div class="oak-log">
+            <div class="face front"></div>
+            <div class="face back"></div>
+            <div class="face left"></div>
+            <div class="face right"></div>
+            <div class="face top"></div>
+            <div class="face bottom"></div>
+          </div>
+          <div class="oak-leaves-cluster lvl-1">
+            <div class="face front"></div>
+            <div class="face back"></div>
+            <div class="face left"></div>
+            <div class="face right"></div>
+            <div class="face top"></div>
+            <div class="face bottom"></div>
+          </div>
+          <div class="oak-leaves-cluster lvl-2">
+            <div class="face front"></div>
+            <div class="face back"></div>
+            <div class="face left"></div>
+            <div class="face right"></div>
+            <div class="face top"></div>
+            <div class="face bottom"></div>
+          </div>
+          <div class="oak-leaves-cluster lvl-3">
+            <div class="face front"></div>
+            <div class="face back"></div>
+            <div class="face left"></div>
+            <div class="face right"></div>
+            <div class="face top"></div>
+            <div class="face bottom"></div>
+          </div>
+        </div>
 
-const renderer = new THREE.WebGLRenderer({antialias:true});
-renderer.setSize(WIDTH, HEIGHT);
-renderer.shadowMap.enabled = true;
-renderer.shadowMap.type = THREE.PCFSoftShadowMap;
-container.appendChild(renderer.domElement);
+        <!-- Tree 2: back-right -->
+        <div class="oak-tree" style="left: 150px; top: -150px; transform: scale(0.9);">
+          <div class="oak-log">
+            <div class="face front"></div>
+            <div class="face back"></div>
+            <div class="face left"></div>
+            <div class="face right"></div>
+            <div class="face top"></div>
+            <div class="face bottom"></div>
+          </div>
+          <div class="oak-leaves-cluster lvl-1">
+            <div class="face front"></div>
+            <div class="face back"></div>
+            <div class="face left"></div>
+            <div class="face right"></div>
+            <div class="face top"></div>
+            <div class="face bottom"></div>
+          </div>
+          <div class="oak-leaves-cluster lvl-2">
+            <div class="face front"></div>
+            <div class="face back"></div>
+            <div class="face left"></div>
+            <div class="face right"></div>
+            <div class="face top"></div>
+            <div class="face bottom"></div>
+          </div>
+          <div class="oak-leaves-cluster lvl-3">
+            <div class="face front"></div>
+            <div class="face back"></div>
+            <div class="face left"></div>
+            <div class="face right"></div>
+            <div class="face top"></div>
+            <div class="face bottom"></div>
+          </div>
+        </div>
 
-const controls = new THREE.OrbitControls(camera, renderer.domElement);
-controls.enableDamping = true;
-controls.dampingFactor = 0.05;
-controls.maxPolarAngle = Math.PI * 0.82;
-controls.minDistance = 3;
-controls.maxDistance = 12;
+        <!-- Tree 3: far back left -->
+        <div class="oak-tree" style="left: -200px; top: -210px; transform: scale(0.7);">
+          <div class="oak-log">
+            <div class="face front"></div>
+            <div class="face back"></div>
+            <div class="face left"></div>
+            <div class="face right"></div>
+            <div class="face top"></div>
+            <div class="face bottom"></div>
+          </div>
+          <div class="oak-leaves-cluster lvl-1">
+            <div class="face front"></div>
+            <div class="face back"></div>
+            <div class="face left"></div>
+            <div class="face right"></div>
+            <div class="face top"></div>
+            <div class="face bottom"></div>
+          </div>
+          <div class="oak-leaves-cluster lvl-2">
+            <div class="face front"></div>
+            <div class="face back"></div>
+            <div class="face left"></div>
+            <div class="face right"></div>
+            <div class="face top"></div>
+            <div class="face bottom"></div>
+          </div>
+        </div>
 
-const dirLight = new THREE.DirectionalLight(0xffffff, 1.1);
-dirLight.position.set(6, 10, 4);
-dirLight.castShadow = true;
-scene.add(dirLight);
-scene.add(new THREE.AmbientLight(0xffffff, 0.45));
+        <!-- Tree 4: front-right -->
+        <div class="oak-tree" style="left: 200px; top: -60px; transform: scale(0.85);">
+          <div class="oak-log">
+            <div class="face front"></div>
+            <div class="face back"></div>
+            <div class="face left"></div>
+            <div class="face right"></div>
+            <div class="face top"></div>
+            <div class="face bottom"></div>
+          </div>
+          <div class="oak-leaves-cluster lvl-1">
+            <div class="face front"></div>
+            <div class="face back"></div>
+            <div class="face left"></div>
+            <div class="face right"></div>
+            <div class="face top"></div>
+            <div class="face bottom"></div>
+          </div>
+          <div class="oak-leaves-cluster lvl-2">
+            <div class="face front"></div>
+            <div class="face back"></div>
+            <div class="face left"></div>
+            <div class="face right"></div>
+            <div class="face top"></div>
+            <div class="face bottom"></div>
+          </div>
+          <div class="oak-leaves-cluster lvl-3">
+            <div class="face front"></div>
+            <div class="face back"></div>
+            <div class="face left"></div>
+            <div class="face right"></div>
+            <div class="face top"></div>
+            <div class="face bottom"></div>
+          </div>
+        </div>
 
-const groundGeo = new THREE.PlaneGeometry(22, 22);
-const groundMat = new THREE.MeshLambertMaterial({color: 0x639b47});
-const ground = new THREE.Mesh(groundGeo, groundMat);
-ground.rotation.x = -Math.PI / 2;
-ground.receiveShadow = true;
-ground.position.y = 0;
-scene.add(ground);
+        <!-- Stone blocks -->
+        <div class="stone-block" style="left: -110px; top: 70px;">
+          <div class="face front"></div>
+          <div class="face back"></div>
+          <div class="face left"></div>
+          <div class="face right"></div>
+          <div class="face top"></div>
+          <div class="face bottom"></div>
+        </div>
 
-const grid = new THREE.GridHelper(22, 22, 0x3b6b2b, 0x4e8838);
-grid.position.y = 0.01;
-scene.add(grid);
+        <div class="stone-block" style="left: 120px; top: 90px; transform: scale(0.8);">
+          <div class="face front"></div>
+          <div class="face back"></div>
+          <div class="face left"></div>
+          <div class="face right"></div>
+          <div class="face top"></div>
+          <div class="face bottom"></div>
+        </div>
 
-function makeTree(x, z){
-    const trunkMat = new THREE.MeshLambertMaterial({color: 0x8b5a2b});
-    const leafMat = new THREE.MeshLambertMaterial({color: 0x2d882d});
-    const trunk = new THREE.Mesh(new THREE.BoxGeometry(0.6, 2.2, 0.6), trunkMat);
-    trunk.position.set(x, 1.1, z);
-    trunk.castShadow = true;
-    const leaf = new THREE.Mesh(new THREE.BoxGeometry(2.2, 2, 2.2), leafMat);
-    leaf.position.set(x, 3.2, z);
-    leaf.castShadow = true;
-    scene.add(trunk, leaf);
-}
-makeTree(-7, -6);
-makeTree(6, -5);
-makeTree(-6, 6);
-makeTree(7, 5);
+        <div class="stone-block" style="left: -40px; top: -190px; transform: scale(0.7);">
+          <div class="face front"></div>
+          <div class="face back"></div>
+          <div class="face left"></div>
+          <div class="face right"></div>
+          <div class="face top"></div>
+          <div class="face bottom"></div>
+        </div>
 
-function makeRock(x, z){
-    const mat = new THREE.MeshLambertMaterial({color: 0x888888});
-    const m = new THREE.Mesh(new THREE.BoxGeometry(1.1, 0.8, 1.1), mat);
-    m.position.set(x, 0.4, z);
-    m.castShadow = true;
-    scene.add(m);
-}
-makeRock(-4, 3);
-makeRock(3, -2);
+        <!-- Character -->
+        <div class="character-group" id="charGroup">
+          <div class="shadow" id="shadow"></div>
 
-function makeCloud(x, y, z){
-    const mat = new THREE.MeshLambertMaterial({color: 0xffffff, transparent: true, opacity: 0.88});
-    const g = new THREE.Group();
-    for(let i = 0; i < 6; i++){
-        const b = new THREE.Mesh(new THREE.BoxGeometry(1.8, 1.2, 1.8), mat);
-        b.position.set((Math.random()-0.5)*3, (Math.random()-0.5)*1.2, (Math.random()-0.5)*3);
-        g.add(b);
-    }
-    g.position.set(x, y, z);
-    scene.add(g);
-    return g;
-}
-const clouds = [
-    makeCloud(-12, 7, -10),
-    makeCloud(14, 8, -12),
-    makeCloud(-10, 9, 12),
-    makeCloud(13, 7, 11)
-];
+          <div class="character idle" id="character">
+            <!-- Head -->
+            <div class="head cube" id="head">
+              <div class="face front">
+                <div class="hair-fringe"></div>
+                <div class="hair-side-fringe l"></div>
+                <div class="hair-side-fringe r"></div>
+                <div class="eye l"></div>
+                <div class="eye r"></div>
+                <div class="nose"></div>
+                <div class="mouth"></div>
+              </div>
+              <div class="face back"></div>
+              <div class="face left"></div>
+              <div class="face right"></div>
+              <div class="face top"></div>
+              <div class="face bottom"></div>
+            </div>
 
-const playerGroup = new THREE.Group();
-playerGroup.position.y = 0;
-scene.add(playerGroup);
+            <!-- Body -->
+            <div class="body cube">
+              <div class="face front">
+                <div class="shirt-collar"></div>
+                <div class="shirt-hem"></div>
+              </div>
+              <div class="face back"></div>
+              <div class="face left"></div>
+              <div class="face right"></div>
+              <div class="face top"></div>
+              <div class="face bottom"></div>
+            </div>
 
-const matSkin = new THREE.MeshLambertMaterial({color: 0xf2c397});
-const matBlue = new THREE.MeshLambertMaterial({color: 0x3366bb});
-const matPants = new THREE.MeshLambertMaterial({color: 0x224488});
+            <!-- Left Arm -->
+            <div class="arm arm-left cube" id="armLeft">
+              <div class="sleeve">
+                <div class="face front"></div>
+                <div class="face back"></div>
+                <div class="face left"></div>
+                <div class="face right"></div>
+                <div class="face top"></div>
+              </div>
+              <div class="face front"></div>
+              <div class="face back"></div>
+              <div class="face left"></div>
+              <div class="face right"></div>
+              <div class="face top"></div>
+              <div class="face bottom"></div>
+            </div>
 
-const head = new THREE.Mesh(new THREE.BoxGeometry(1, 1, 1), matSkin);
-head.position.y = 2.6;
-head.castShadow = true;
-playerGroup.add(head);
+            <!-- Right Arm -->
+            <div class="arm arm-right cube" id="armRight">
+              <div class="sleeve">
+                <div class="face front"></div>
+                <div class="face back"></div>
+                <div class="face left"></div>
+                <div class="face right"></div>
+                <div class="face top"></div>
+              </div>
+              <div class="face front"></div>
+              <div class="face back"></div>
+              <div class="face left"></div>
+              <div class="face right"></div>
+              <div class="face top"></div>
+              <div class="face bottom"></div>
+            </div>
 
-const body = new THREE.Mesh(new THREE.BoxGeometry(1, 1.2, 0.6), matBlue);
-body.position.y = 1.5;
-body.castShadow = true;
-playerGroup.add(body);
+            <!-- Left Leg -->
+            <div class="leg leg-left cube" id="legLeft">
+              <div class="shoe">
+                <div class="face front"></div>
+                <div class="face back"></div>
+                <div class="face left"></div>
+                <div class="face right"></div>
+                <div class="face top"></div>
+                <div class="face bottom"></div>
+              </div>
+              <div class="face front"></div>
+              <div class="face back"></div>
+              <div class="face left"></div>
+              <div class="face right"></div>
+              <div class="face top"></div>
+              <div class="face bottom"></div>
+            </div>
 
-const armL = new THREE.Mesh(new THREE.BoxGeometry(0.4, 1.1, 0.4), matSkin);
-armL.position.set(-0.72, 1.6, 0);
-armL.castShadow = true;
-playerGroup.add(armL);
+            <!-- Right Leg -->
+            <div class="leg leg-right cube" id="legRight">
+              <div class="shoe">
+                <div class="face front"></div>
+                <div class="face back"></div>
+                <div class="face left"></div>
+                <div class="face right"></div>
+                <div class="face top"></div>
+                <div class="face bottom"></div>
+              </div>
+              <div class="face front"></div>
+              <div class="face back"></div>
+              <div class="face left"></div>
+              <div class="face right"></div>
+              <div class="face top"></div>
+              <div class="face bottom"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
 
-const armR = new THREE.Mesh(new THREE.BoxGeometry(0.4, 1.1, 0.4), matSkin);
-armR.position.set(0.72, 1.6, 0);
-armR.castShadow = true;
-playerGroup.add(armR);
+    <div class="hud">
+      <button class="action-btn" data-action="wave">挥手</button>
+      <button class="action-btn" data-action="jump">跳跃</button>
+      <button class="action-btn" data-action="spin">转身</button>
+      <button class="action-btn" data-action="dance">跳舞</button>
+    </div>
+  </div>
 
-const legL = new THREE.Mesh(new THREE.BoxGeometry(0.4, 1.1, 0.4), matPants);
-legL.position.set(-0.32, 0.45, 0);
-legL.castShadow = true;
-playerGroup.add(legL);
+  <script>
+    (function() {
+      // Generate grass block ground platform
+      const groundPlatform = document.getElementById('groundPlatform');
+      const BLOCK_SIZE = 32;
+      const GRID_SIZE = 9;
+      const half = Math.floor(GRID_SIZE / 2);
 
-const legR = new THREE.Mesh(new THREE.BoxGeometry(0.4, 1.1, 0.4), matPants);
-legR.position.set(0.32, 0.45, 0);
-legR.castShadow = true;
-playerGroup.add(legR);
-
-const state = {
-    isDragging: false,
-    floatHeight: 0,
-    velocityY: 0,
-    gravity: -18,
-    groundY: 0,
-    squash: 1.0,
-    staggerTimer: 0
-};
-
-renderer.domElement.addEventListener('pointerdown', () => {
-    state.isDragging = true;
-});
-renderer.domElement.addEventListener('pointerup', () => {
-    state.isDragging = false;
-    state.velocityY = state.floatHeight * 7.5;
-});
-renderer.domElement.addEventListener('pointerleave', () => {
-    state.isDragging = false;
-    state.velocityY = state.floatHeight * 7.5;
-});
-
-const clock = new THREE.Clock();
-
-function animate(){
-    requestAnimationFrame(animate);
-    const dt = clock.getDelta();
-    controls.update();
-
-    if(state.isDragging){
-        state.floatHeight += (1.8 - state.floatHeight) * 6 * dt;
-        state.velocityY = 0;
-    } else {
-        state.velocityY += state.gravity * dt;
-        state.floatHeight += state.velocityY * dt;
-
-        if(state.floatHeight <= 0){
-            state.floatHeight = 0;
-            if(state.velocityY < -3){
-                state.squash = 0.62;
-                state.staggerTimer = 0.45;
-                state.velocityY = -state.velocityY * 0.32;
-            } else {
-                state.velocityY = 0;
-            }
+      // Top grass layer
+      for (let gz = -half; gz <= half; gz++) {
+        for (let gx = -half; gx <= half; gx++) {
+          const block = document.createElement('div');
+          block.className = 'grass-block';
+          block.style.left = (gx * BLOCK_SIZE - BLOCK_SIZE/2) + 'px';
+          block.style.top = (gz * BLOCK_SIZE - BLOCK_SIZE/2) + 'px';
+          block.style.transform = 'rotateX(90deg) translateZ(16px)';
+          block.innerHTML = `
+            <div style="transform: rotateX(-90deg); transform-style: preserve-3d; width:100%; height:100%;">
+              <div class="face side front"></div>
+              <div class="face side back"></div>
+              <div class="face side left"></div>
+              <div class="face side right"></div>
+              <div class="face top"></div>
+              <div class="face bottom"></div>
+            </div>
+          `;
+          groundPlatform.appendChild(block);
         }
-    }
+      }
 
-    if(state.staggerTimer > 0){
-        state.staggerTimer -= dt;
-    }
-    state.squash += (1 - state.squash) * 7 * dt;
+      // Dirt layer underneath
+      for (let gz = -half; gz <= half; gz++) {
+        for (let gx = -half; gx <= half; gx++) {
+          const block = document.createElement('div');
+          block.className = 'grass-block dirt-block';
+          block.style.left = (gx * BLOCK_SIZE - BLOCK_SIZE/2) + 'px';
+          block.style.top = (gz * BLOCK_SIZE - BLOCK_SIZE/2) + 'px';
+          block.style.transform = 'rotateX(90deg) translateZ(-16px)';
+          block.innerHTML = `
+            <div style="transform: rotateX(-90deg); transform-style: preserve-3d; width:100%; height:100%;">
+              <div class="face side front"></div>
+              <div class="face side back"></div>
+              <div class="face side left"></div>
+              <div class="face side right"></div>
+              <div class="face top"></div>
+              <div class="face bottom"></div>
+            </div>
+          `;
+          groundPlatform.appendChild(block);
+        }
+      }
 
-    playerGroup.position.y = state.floatHeight;
-    playerGroup.scale.y = state.squash;
+      // DOM
+      const stage = document.getElementById('stage');
+      const world = document.getElementById('world');
+      const charGroup = document.getElementById('charGroup');
+      const character = document.getElementById('character');
+      const shadow = document.getElementById('shadow');
+      const buttons = document.querySelectorAll('.action-btn');
 
-    clouds.forEach((c, i) => {
-        c.position.x += dt * 0.22 * ((i % 2) ? 1 : -1);
-        if(c.position.x > 18) c.position.x = -18;
-        if(c.position.x < -18) c.position.x = 18;
-    });
+      // State
+      let rotX = -22;
+      let rotY = 0;
+      let charHeight = 0;
+      let charVelocity = 0;
 
-    renderer.render(scene, camera);
-}
-animate();
-</script>
+      let isDragging = false;
+      let lastX = 0;
+      let lastY = 0;
+      let dragStartTime = 0;
+      let dragMoved = false;
+
+      let isFalling = false;
+      let isLanding = false;
+
+      let actionTimer = null;
+      let currentAction = null;
+
+      const GRAVITY = 0.9;
+      const BOUNCE_DAMPING = 0.55;
+      const BOUNCE_THRESHOLD = 2;
+      const FLOAT_HEIGHT = 25;
+
+      const MIN_PITCH = -65;
+      const MAX_PITCH = 0;
+
+      function updateWorldTransform() {
+        world.style.transform = `rotateX(${rotX}deg) rotateY(${rotY}deg)`;
+      }
+
+      function updateCharTransform() {
+        charGroup.style.transform = `translateY(${-charHeight}px)`;
+        const scale = Math.max(0.5, 1 - charHeight / 150);
+        const opacity = Math.max(0.1, 0.3 - charHeight / 200);
+        shadow.style.transform = `rotateX(90deg) translateZ(0.5px) scale(${scale})`;
+        shadow.style.opacity = opacity;
+      }
+
+      // Physics
+      let physicsRAF = null;
+
+      function startPhysics() {
+        if (physicsRAF) return;
+
+        function tick() {
+          if (!isFalling) {
+            physicsRAF = null;
+            return;
+          }
+
+          charVelocity += GRAVITY;
+          charHeight -= charVelocity;
+
+          if (charHeight <= 0) {
+            charHeight = 0;
+
+            if (Math.abs(charVelocity) > BOUNCE_THRESHOLD) {
+              charVelocity = -charVelocity * BOUNCE_DAMPING;
+              playLandImpact(charVelocity < -5);
+            } else {
+              charVelocity = 0;
+              isFalling = false;
+              playFinalLanding();
+              updateCharTransform();
+              physicsRAF = null;
+              return;
+            }
+          }
+
+          updateCharTransform();
+          physicsRAF = requestAnimationFrame(tick);
+        }
+
+        physicsRAF = requestAnimationFrame(tick);
+      }
+
+      function playLandImpact(heavy) {
+        character.classList.remove('idle', 'dragging');
+        character.classList.add('landing');
+        setTimeout(() => {
+          character.classList.remove('landing');
+        }, 250);
+      }
+
+      function playFinalLanding() {
+        isLanding = true;
+        character.classList.remove('landing', 'dragging');
+        character.classList.add('stagger');
+
+        setTimeout(() => {
+          character.classList.remove('stagger');
+          character.classList.add('idle');
+          isLanding = false;
+        }, 800);
+      }
+
+      // Drag handlers
+      function onDragStart(e) {
+        if (isFalling || isLanding) return;
+        if (e.target.closest('.action-btn')) return;
+
+        isDragging = true;
+        dragMoved = false;
+        dragStartTime = Date.now();
+
+        const point = getPointer(e);
+        lastX = point.x;
+        lastY = point.y;
+
+        character.classList.remove('idle');
+        character.classList.add('dragging');
+
+        animateFloat(FLOAT_HEIGHT);
+
+        e.preventDefault();
+      }
+
+      function onDragMove(e) {
+        if (!isDragging) return;
+
+        const point = getPointer(e);
+        const dx = point.x - lastX;
+        const dy = point.y - lastY;
+
+        if (Math.abs(dx) + Math.abs(dy) > 2) {
+          dragMoved = true;
+        }
+
+        rotY += dx * 0.5;
+        rotX -= dy * 0.5;
+        rotX = Math.max(MIN_PITCH, Math.min(MAX_PITCH, rotX));
+
+        updateWorldTransform();
+
+        lastX = point.x;
+        lastY = point.y;
+
+        e.preventDefault();
+      }
+
+      function onDragEnd(e) {
+        if (!isDragging) return;
+        isDragging = false;
+
+        const dragDuration = Date.now() - dragStartTime;
+
+        if (!dragMoved && dragDuration < 200) {
+          character.classList.remove('dragging');
+          charHeight = 0;
+          updateCharTransform();
+          character.classList.add('idle');
+
+          const actions = ['wave', 'jump', 'dance'];
+          const random = actions[Math.floor(Math.random() * actions.length)];
+          playAction(random);
+          return;
+        }
+
+        if (charHeight > 0) {
+          isFalling = true;
+          startPhysics();
+        } else {
+          character.classList.remove('dragging');
+          character.classList.add('idle');
+        }
+      }
+
+      function getPointer(e) {
+        if (e.touches && e.touches[0]) {
+          return { x: e.touches[0].clientX, y: e.touches[0].clientY };
+        }
+        if (e.changedTouches && e.changedTouches[0]) {
+          return { x: e.changedTouches[0].clientX, y: e.changedTouches[0].clientY };
+        }
+        return { x: e.clientX, y: e.clientY };
+      }
+
+      function animateFloat(targetHeight) {
+        const startHeight = charHeight;
+        const distance = targetHeight - startHeight;
+        const duration = 250;
+        const startTime = performance.now();
+
+        function step(now) {
+          if (!isDragging) return;
+
+          const t = Math.min(1, (now - startTime) / duration);
+          const eased = 1 - Math.pow(1 - t, 3);
+          charHeight = startHeight + distance * eased;
+          updateCharTransform();
+
+          if (t < 1 && isDragging) {
+            requestAnimationFrame(step);
+          }
+        }
+
+        requestAnimationFrame(step);
+      }
+
+      stage.addEventListener('mousedown', onDragStart);
+      window.addEventListener('mousemove', onDragMove);
+      window.addEventListener('mouseup', onDragEnd);
+
+      stage.addEventListener('touchstart', onDragStart, { passive: false });
+      window.addEventListener('touchmove', onDragMove, { passive: false });
+      window.addEventListener('touchend', onDragEnd);
+
+      // Action buttons
+      function playAction(action) {
+        if (currentAction || isFalling || isDragging || isLanding) return;
+
+        currentAction = action;
+        character.classList.remove('idle');
+        character.classList.add(action);
+
+        buttons.forEach(b => {
+          if (b.dataset.action === action) b.classList.add('active');
+        });
+
+        const durations = {
+          wave: 1500,
+          jump: 1000,
+          spin: 1800,
+          dance: 2700
+        };
+
+        actionTimer = setTimeout(() => {
+          character.classList.remove(action);
+          character.classList.add('idle');
+          buttons.forEach(b => b.classList.remove('active'));
+          currentAction = null;
+        }, durations[action]);
+      }
+
+      buttons.forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          playAction(btn.dataset.action);
+        });
+      });
+
+      updateWorldTransform();
+      updateCharTransform();
+    })();
+  </script>
 </body>
 </html>
