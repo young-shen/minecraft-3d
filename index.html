@@ -410,8 +410,8 @@
     .arm .face.top    { width: 20px; height: 20px; transform: rotateX(90deg) translateZ(32px); background: #D4A880; top: 0; }
     .arm .face.bottom { width: 20px; height: 20px; transform: rotateX(-90deg) translateZ(32px); background: #D4A880; bottom: 0; top: auto; }
 
-    .arm-left { left: 0; transform-origin: 50% 0px; }
-    .arm-right { right: 0; transform-origin: 50% 0px; }
+    .arm-left { left: -2px; transform-origin: 50% 0px; }
+    .arm-right { right: -2px; transform-origin: 50% 0px; }
 
     .sleeve {
       position: absolute;
@@ -427,6 +427,7 @@
     .sleeve .face.left   { width: 22px; height: 22px; transform: rotateY(-90deg) translateZ(11px); background: #009090; }
     .sleeve .face.right  { width: 22px; height: 22px; transform: rotateY(90deg) translateZ(11px); background: #009090; }
     .sleeve .face.top    { width: 22px; height: 22px; transform: rotateX(90deg) translateZ(11px); background: #009999; }
+    .sleeve .face.bottom { width: 22px; height: 22px; transform: rotateX(-90deg) translateZ(11px); background: #008888; }
 
     /* --- Legs (22 wide x 72 tall x 22 deep) --- */
     .leg {
@@ -988,6 +989,7 @@
                 <div class="face left"></div>
                 <div class="face right"></div>
                 <div class="face top"></div>
+                <div class="face bottom"></div>
               </div>
               <div class="face front"></div>
               <div class="face back"></div>
@@ -1005,6 +1007,7 @@
                 <div class="face left"></div>
                 <div class="face right"></div>
                 <div class="face top"></div>
+                <div class="face bottom"></div>
               </div>
               <div class="face front"></div>
               <div class="face back"></div>
@@ -1076,17 +1079,14 @@
           const block = document.createElement('div');
           block.className = 'grass-block';
           block.style.left = (gx * BLOCK_SIZE - BLOCK_SIZE/2) + 'px';
-          block.style.top = (gz * BLOCK_SIZE - BLOCK_SIZE/2) + 'px';
-          block.style.transform = 'rotateX(90deg) translateZ(16px)';
+          block.style.transform = `translateY(16px) translateZ(${gz * BLOCK_SIZE - BLOCK_SIZE/2}px)`;
           block.innerHTML = `
-            <div style="transform: rotateX(-90deg); transform-style: preserve-3d; width:100%; height:100%;">
-              <div class="face side front"></div>
-              <div class="face side back"></div>
-              <div class="face side left"></div>
-              <div class="face side right"></div>
-              <div class="face top"></div>
-              <div class="face bottom"></div>
-            </div>
+            <div class="face top"></div>
+            <div class="face bottom"></div>
+            <div class="face side front"></div>
+            <div class="face side back"></div>
+            <div class="face side left"></div>
+            <div class="face side right"></div>
           `;
           groundPlatform.appendChild(block);
         }
@@ -1098,17 +1098,14 @@
           const block = document.createElement('div');
           block.className = 'grass-block dirt-block';
           block.style.left = (gx * BLOCK_SIZE - BLOCK_SIZE/2) + 'px';
-          block.style.top = (gz * BLOCK_SIZE - BLOCK_SIZE/2) + 'px';
-          block.style.transform = 'rotateX(90deg) translateZ(-16px)';
+          block.style.transform = `translateY(48px) translateZ(${gz * BLOCK_SIZE - BLOCK_SIZE/2}px)`;
           block.innerHTML = `
-            <div style="transform: rotateX(-90deg); transform-style: preserve-3d; width:100%; height:100%;">
-              <div class="face side front"></div>
-              <div class="face side back"></div>
-              <div class="face side left"></div>
-              <div class="face side right"></div>
-              <div class="face top"></div>
-              <div class="face bottom"></div>
-            </div>
+            <div class="face top"></div>
+            <div class="face bottom"></div>
+            <div class="face side front"></div>
+            <div class="face side back"></div>
+            <div class="face side left"></div>
+            <div class="face side right"></div>
           `;
           groundPlatform.appendChild(block);
         }
